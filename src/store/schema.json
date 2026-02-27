@@ -1,0 +1,222 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Product API",
+    "version": "1.0.0",
+    "description": "API for products, deals, and reviews"
+  },
+  "servers": [{ "url": "/api" }],
+  "paths": {
+    "/products": {
+      "get": {
+        "summary": "Fetch products with pagination",
+        "parameters": [
+          { "in": "query", "name": "skip", "schema": { "type": "integer" } },
+          { "in": "query", "name": "limit", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Product" }
+                }
+              }
+            }
+          },
+          "500": { "description": "Error fetching products" }
+        }
+      }
+    },
+    "/products/deals": {
+      "get": {
+        "summary": "Fetch all product deals",
+        "responses": {
+          "200": {
+            "description": "List of deals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Deal" }
+                }
+              }
+            }
+          },
+          "500": { "description": "Failed to fetch deals" }
+        }
+      }
+    },
+    "/products/search": {
+      "get": {
+        "summary": "Search products by name or description",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Product" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Search query is required" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "summary": "Fetch single product by ID with reviews",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with reviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "product": { "$ref": "#/components/schemas/Product" },
+                    "reviews": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Review" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Product not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/products/{id}/reviews": {
+      "post": {
+        "summary": "Add a review for a product",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["rating"],
+                "properties": {
+                  "rating": { "type": "number" },
+                  "comment": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Review" }
+              }
+            }
+          },
+          "500": { "description": "Server error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Deal": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "name": { "type": "string" },
+          "brand": { "type": "string" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "image": { "type": "string" },
+          "originalPrice": { "type": "number" },
+          "discountPercentage": { "type": "number" },
+          "dealPrice": { "type": "number" },
+          "stock": { "type": "number" },
+          "isActive": { "type": "boolean" }
+        },
+        "required": [
+          "_id",
+          "name",
+          "brand",
+          "category",
+          "description",
+          "image",
+          "originalPrice",
+          "discountPercentage",
+          "dealPrice"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "name": { "type": "string" },
+          "brand": { "type": "string" },
+          "category": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "number" },
+          "description": { "type": "string" },
+          "image": { "type": "string" },
+          "rating": { "type": "number" },
+          "numReviews": { "type": "number" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["_id", "name", "price", "stock"]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "userId": {
+            "type": "object",
+            "required": ["_id", "name"],
+            "properties": {
+              "_id": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          },
+          "productId": { "type": "string" },
+          "rating": { "type": "number" },
+          "comment": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["_id", "productId", "rating"]
+      }
+    }
+  },
+  "tags": []
+}

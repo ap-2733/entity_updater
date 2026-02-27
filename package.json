@@ -1,0 +1,32 @@
+{
+  "name": "entity_updater",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "test": "jest",
+    "generate": "npx @rtk-query/codegen-openapi ./src/store/openapi-config.ts",
+    "mapping": "node -r esbuild-runner/register src/scripts/generate.ts"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@rtk-query/codegen-openapi": "^2.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20",
+    "babel-jest": "^30.2.0",
+    "esbuild-runner": "^2.2.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "jest": "^30.2.0",
+    "msw": "^2.12.10",
+    "prettier": "3.8.1",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  }
+}
