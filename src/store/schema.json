@@ -193,7 +193,11 @@
           "image": { "type": "string" },
           "rating": { "type": "number" },
           "numReviews": { "type": "number" },
-          "createdAt": { "type": "string", "format": "date-time" }
+          "createdAt": { "type": "string", "format": "date-time" },
+          "relatedProducts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Product" }
+          }
         },
         "required": ["_id", "name", "price", "stock"]
       },

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "eslint",
+    "lint": "eslint && npx tsc --noEmit",
     "test": "jest",
     "generate": "npx @rtk-query/codegen-openapi ./src/store/openapi-config.ts",
     "mapping": "node -r esbuild-runner/register src/scripts/generate.ts"
@@ -22,11 +22,11 @@
     "babel-jest": "^30.2.0",
     "esbuild-runner": "^2.2.2",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
     "jest": "^30.2.0",
     "msw": "^2.12.10",
     "prettier": "3.8.1",
     "ts-jest": "^29.4.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.1"
   }
 }

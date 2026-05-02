@@ -90,6 +90,7 @@ export type Product = {
   rating?: number;
   numReviews?: number;
   createdAt?: string;
+  relatedProducts?: Product[];
 };
 export type Deal = {
   _id: string;
