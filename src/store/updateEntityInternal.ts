@@ -28,7 +28,9 @@ export function updateEntityInternal(payload: {
               if (item == null) break;
               item = item[segment];
             }
-            if (item != null) payload.update(item);
+            if (item != null) {
+              payload.update(item);
+            }
           }
         },
       );

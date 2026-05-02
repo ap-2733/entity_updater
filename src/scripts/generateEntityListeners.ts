@@ -113,7 +113,9 @@ function generateWalk(
       const decl = prop.valueDeclaration ?? prop.declarations?.[0];
       if (!decl) continue;
       const inner = generateWalk(checker, checker.getTypeOfSymbolAtLocation(prop, decl), `${expr}.${prop.getName()}`, `[...${kp}, "${prop.getName()}"]`, depth, entities);
-      if (inner) lines.push(inner);
+      if (inner) {
+        lines.push(inner);
+      }
     }
     const code = lines.join("\n");
     return code && nullable ? `if (${expr} != null) {\n${code}\n}` : code;
@@ -127,7 +129,9 @@ function generateWalk(
       const decl = prop.valueDeclaration ?? prop.declarations?.[0];
       if (!decl) continue;
       const inner = generateWalk(checker, checker.getTypeOfSymbolAtLocation(prop, decl), `${expr}.${prop.getName()}`, `[...${kp}, "${prop.getName()}"]`, depth, entities);
-      if (inner) lines.push(inner);
+      if (inner) {
+        lines.push(inner);
+      }
     }
     const code = lines.join("\n");
     return code && nullable ? `if (${expr} != null) {\n${code}\n}` : code;
@@ -246,7 +250,7 @@ function buildLoadEffect(
     `const arg = action.meta.arg.originalArgs;\n` +
     `const batch: any[] = [];\n` +
     `${walkerName}(\ndata,\n${callbacks}\n);\n` +
-    `if (batch.length) dispatch(entityLoaded(batch));\n` +
+    `if (batch.length) {\ndispatch(entityLoaded(batch));\n}\n` +
     `}`
   );
 }
@@ -270,12 +274,12 @@ function buildRemovalEffect(
     `(action, { getOriginalState, dispatch }) => {\n` +
     `const { queryCacheKey } = action.payload;\n` +
     `const query = (getOriginalState() as any)[productApi.reducerPath]?.queries?.[queryCacheKey];\n` +
-    `if (query?.endpointName !== "${queryName}") return;\n` +
+    `if (query?.endpointName !== "${queryName}") {\nreturn;\n}\n` +
     `const data = query.data as any;\n` +
-    `if (!data) return;\n` +
+    `if (!data) {\nreturn;\n}\n` +
     `const batch: any[] = [];\n` +
     `${walkerName}(\ndata,\n${callbacks}\n);\n` +
-    `if (batch.length) dispatch(entityRemoved(batch));\n` +
+    `if (batch.length) {\ndispatch(entityRemoved(batch));\n}\n` +
     `}`
   );
 }
@@ -305,18 +309,18 @@ function buildPatchEffect(
     .join(",\n");
   return (
     `(action, { getOriginalState, getState, dispatch }) => {\n` +
-    `if ('fromEntityUpdate' in action.payload && action.payload.fromEntityUpdate) return;\n` +
+    `if ('fromEntityUpdate' in action.payload && action.payload.fromEntityUpdate) {\nreturn;\n}\n` +
     `const { queryCacheKey } = action.payload;\n` +
     `const query = (getState() as any)[productApi.reducerPath]?.queries?.[queryCacheKey];\n` +
-    `if (query?.endpointName !== "${queryName}") return;\n` +
+    `if (query?.endpointName !== "${queryName}") {\nreturn;\n}\n` +
     `const oldData = (getOriginalState() as any)[productApi.reducerPath]?.queries?.[queryCacheKey]?.data;\n` +
     `const newData = query.data as any;\n` +
     `const removeBatch: any[] = [];\n` +
     `const loadBatch: any[] = [];\n` +
-    `if (oldData) ${walkerName}(\noldData,\n${removeCallbacks}\n);\n` +
-    `if (newData) ${walkerName}(\nnewData,\n${loadCallbacks}\n);\n` +
-    `if (removeBatch.length) dispatch(entityRemoved(removeBatch));\n` +
-    `if (loadBatch.length) dispatch(entityLoaded(loadBatch));\n` +
+    `if (oldData) {\n${walkerName}(\noldData,\n${removeCallbacks}\n);\n}\n` +
+    `if (newData) {\n${walkerName}(\nnewData,\n${loadCallbacks}\n);\n}\n` +
+    `if (removeBatch.length) {\ndispatch(entityRemoved(removeBatch));\n}\n` +
+    `if (loadBatch.length) {\ndispatch(entityLoaded(loadBatch));\n}\n` +
     `}`
   );
 }

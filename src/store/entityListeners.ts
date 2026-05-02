@@ -40,7 +40,9 @@ entityListenerMiddleware.startListening({
         queryArgs: arg,
       }),
     );
-    if (batch.length) dispatch(entityLoaded(batch));
+    if (batch.length) {
+      dispatch(entityLoaded(batch));
+    }
   },
 });
 
@@ -50,33 +52,45 @@ entityListenerMiddleware.startListening({
     const { queryCacheKey } = action.payload;
     const query = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey];
-    if (query?.endpointName !== "getProducts") return;
+    if (query?.endpointName !== "getProducts") {
+      return;
+    }
     const data = query.data as any;
-    if (!data) return;
+    if (!data) {
+      return;
+    }
     const batch: any[] = [];
     walkGetProducts(data, (item) =>
       batch.push({ entityType: "Product", id: item._id, queryCacheKey }),
     );
-    if (batch.length) dispatch(entityRemoved(batch));
+    if (batch.length) {
+      dispatch(entityRemoved(batch));
+    }
   },
 });
 
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
-    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+    if (
+      "fromEntityUpdate" in action.payload &&
+      action.payload.fromEntityUpdate
+    ) {
       return;
+    }
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
     ];
-    if (query?.endpointName !== "getProducts") return;
+    if (query?.endpointName !== "getProducts") {
+      return;
+    }
     const oldData = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey]?.data;
     const newData = query.data as any;
     const removeBatch: any[] = [];
     const loadBatch: any[] = [];
-    if (oldData)
+    if (oldData) {
       walkGetProducts(oldData, (item) =>
         removeBatch.push({
           entityType: "Product",
@@ -84,7 +98,8 @@ entityListenerMiddleware.startListening({
           queryCacheKey,
         }),
       );
-    if (newData)
+    }
+    if (newData) {
       walkGetProducts(newData, (item, keyPath) =>
         loadBatch.push({
           entityType: "Product",
@@ -94,8 +109,13 @@ entityListenerMiddleware.startListening({
           queryArgs: query.originalArgs,
         }),
       );
-    if (removeBatch.length) dispatch(entityRemoved(removeBatch));
-    if (loadBatch.length) dispatch(entityLoaded(loadBatch));
+    }
+    if (removeBatch.length) {
+      dispatch(entityRemoved(removeBatch));
+    }
+    if (loadBatch.length) {
+      dispatch(entityLoaded(loadBatch));
+    }
   },
 });
 
@@ -126,7 +146,9 @@ entityListenerMiddleware.startListening({
         queryArgs: arg,
       }),
     );
-    if (batch.length) dispatch(entityLoaded(batch));
+    if (batch.length) {
+      dispatch(entityLoaded(batch));
+    }
   },
 });
 
@@ -136,37 +158,50 @@ entityListenerMiddleware.startListening({
     const { queryCacheKey } = action.payload;
     const query = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey];
-    if (query?.endpointName !== "getProductsDeals") return;
+    if (query?.endpointName !== "getProductsDeals") {
+      return;
+    }
     const data = query.data as any;
-    if (!data) return;
+    if (!data) {
+      return;
+    }
     const batch: any[] = [];
     walkGetProductsDeals(data, (item) =>
       batch.push({ entityType: "Deal", id: item._id, queryCacheKey }),
     );
-    if (batch.length) dispatch(entityRemoved(batch));
+    if (batch.length) {
+      dispatch(entityRemoved(batch));
+    }
   },
 });
 
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
-    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+    if (
+      "fromEntityUpdate" in action.payload &&
+      action.payload.fromEntityUpdate
+    ) {
       return;
+    }
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
     ];
-    if (query?.endpointName !== "getProductsDeals") return;
+    if (query?.endpointName !== "getProductsDeals") {
+      return;
+    }
     const oldData = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey]?.data;
     const newData = query.data as any;
     const removeBatch: any[] = [];
     const loadBatch: any[] = [];
-    if (oldData)
+    if (oldData) {
       walkGetProductsDeals(oldData, (item) =>
         removeBatch.push({ entityType: "Deal", id: item._id, queryCacheKey }),
       );
-    if (newData)
+    }
+    if (newData) {
       walkGetProductsDeals(newData, (item, keyPath) =>
         loadBatch.push({
           entityType: "Deal",
@@ -176,8 +211,13 @@ entityListenerMiddleware.startListening({
           queryArgs: query.originalArgs,
         }),
       );
-    if (removeBatch.length) dispatch(entityRemoved(removeBatch));
-    if (loadBatch.length) dispatch(entityLoaded(loadBatch));
+    }
+    if (removeBatch.length) {
+      dispatch(entityRemoved(removeBatch));
+    }
+    if (loadBatch.length) {
+      dispatch(entityLoaded(loadBatch));
+    }
   },
 });
 
@@ -216,7 +256,9 @@ entityListenerMiddleware.startListening({
         queryArgs: arg,
       }),
     );
-    if (batch.length) dispatch(entityLoaded(batch));
+    if (batch.length) {
+      dispatch(entityLoaded(batch));
+    }
   },
 });
 
@@ -226,33 +268,45 @@ entityListenerMiddleware.startListening({
     const { queryCacheKey } = action.payload;
     const query = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey];
-    if (query?.endpointName !== "getProductsSearch") return;
+    if (query?.endpointName !== "getProductsSearch") {
+      return;
+    }
     const data = query.data as any;
-    if (!data) return;
+    if (!data) {
+      return;
+    }
     const batch: any[] = [];
     walkGetProductsSearch(data, (item) =>
       batch.push({ entityType: "Product", id: item._id, queryCacheKey }),
     );
-    if (batch.length) dispatch(entityRemoved(batch));
+    if (batch.length) {
+      dispatch(entityRemoved(batch));
+    }
   },
 });
 
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
-    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+    if (
+      "fromEntityUpdate" in action.payload &&
+      action.payload.fromEntityUpdate
+    ) {
       return;
+    }
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
     ];
-    if (query?.endpointName !== "getProductsSearch") return;
+    if (query?.endpointName !== "getProductsSearch") {
+      return;
+    }
     const oldData = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey]?.data;
     const newData = query.data as any;
     const removeBatch: any[] = [];
     const loadBatch: any[] = [];
-    if (oldData)
+    if (oldData) {
       walkGetProductsSearch(oldData, (item) =>
         removeBatch.push({
           entityType: "Product",
@@ -260,7 +314,8 @@ entityListenerMiddleware.startListening({
           queryCacheKey,
         }),
       );
-    if (newData)
+    }
+    if (newData) {
       walkGetProductsSearch(newData, (item, keyPath) =>
         loadBatch.push({
           entityType: "Product",
@@ -270,8 +325,13 @@ entityListenerMiddleware.startListening({
           queryArgs: query.originalArgs,
         }),
       );
-    if (removeBatch.length) dispatch(entityRemoved(removeBatch));
-    if (loadBatch.length) dispatch(entityLoaded(loadBatch));
+    }
+    if (removeBatch.length) {
+      dispatch(entityRemoved(removeBatch));
+    }
+    if (loadBatch.length) {
+      dispatch(entityLoaded(loadBatch));
+    }
   },
 });
 
@@ -330,7 +390,9 @@ entityListenerMiddleware.startListening({
           queryArgs: arg,
         }),
     );
-    if (batch.length) dispatch(entityLoaded(batch));
+    if (batch.length) {
+      dispatch(entityLoaded(batch));
+    }
   },
 });
 
@@ -340,9 +402,13 @@ entityListenerMiddleware.startListening({
     const { queryCacheKey } = action.payload;
     const query = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey];
-    if (query?.endpointName !== "getProductsById") return;
+    if (query?.endpointName !== "getProductsById") {
+      return;
+    }
     const data = query.data as any;
-    if (!data) return;
+    if (!data) {
+      return;
+    }
     const batch: any[] = [];
     walkGetProductsById(
       data,
@@ -351,26 +417,34 @@ entityListenerMiddleware.startListening({
       (item) =>
         batch.push({ entityType: "Review", id: item._id, queryCacheKey }),
     );
-    if (batch.length) dispatch(entityRemoved(batch));
+    if (batch.length) {
+      dispatch(entityRemoved(batch));
+    }
   },
 });
 
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
-    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+    if (
+      "fromEntityUpdate" in action.payload &&
+      action.payload.fromEntityUpdate
+    ) {
       return;
+    }
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
     ];
-    if (query?.endpointName !== "getProductsById") return;
+    if (query?.endpointName !== "getProductsById") {
+      return;
+    }
     const oldData = (getOriginalState() as any)[productApi.reducerPath]
       ?.queries?.[queryCacheKey]?.data;
     const newData = query.data as any;
     const removeBatch: any[] = [];
     const loadBatch: any[] = [];
-    if (oldData)
+    if (oldData) {
       walkGetProductsById(
         oldData,
         (item) =>
@@ -386,7 +460,8 @@ entityListenerMiddleware.startListening({
             queryCacheKey,
           }),
       );
-    if (newData)
+    }
+    if (newData) {
       walkGetProductsById(
         newData,
         (item, keyPath) =>
@@ -406,7 +481,12 @@ entityListenerMiddleware.startListening({
             queryArgs: query.originalArgs,
           }),
       );
-    if (removeBatch.length) dispatch(entityRemoved(removeBatch));
-    if (loadBatch.length) dispatch(entityLoaded(loadBatch));
+    }
+    if (removeBatch.length) {
+      dispatch(entityRemoved(removeBatch));
+    }
+    if (loadBatch.length) {
+      dispatch(entityLoaded(loadBatch));
+    }
   },
 });
