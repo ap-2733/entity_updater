@@ -6,7 +6,6 @@ export function createUpdaters(mapping: Mapping) {
   const imports = `
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { productApi } from "@/src/store/productApi";
-import { mapping } from "@/src/store/mapping";
 import { updateEntity } from "@/src/store/updateEntity";
 import type { ${modelNames.join(", ")} } from "@/src/store/productApi";
 
@@ -18,18 +17,18 @@ export const update${modelName}Entity = createAsyncThunk(
   "Update${modelName}Entity",
   async (
     payload: {
-      filter: Partial<${modelName}>;
+      id: string;
       update: Partial<${modelName}>;
     },
     thunkApi,
   ) => {
     await updateEntity(
-      mapping["${modelName}"],
+      "${modelName}",
+      payload.id,
+      (draft) => Object.assign(draft, payload.update),
       thunkApi.getState,
       thunkApi.dispatch,
       productApi,
-      payload.filter,
-      payload.update,
     );
   },
 );

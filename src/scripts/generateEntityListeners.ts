@@ -409,6 +409,7 @@ function buildPatchEffect(
     .join(",\n");
   return (
     `(action, { getOriginalState, getState, dispatch }) => {\n` +
+    `if ('fromEntityUpdate' in action.payload && action.payload.fromEntityUpdate) return;\n` +
     `const { queryCacheKey } = action.payload;\n` +
     `const query = (getState() as any)[productApi.reducerPath]?.queries?.[queryCacheKey];\n` +
     `if (query?.endpointName !== "${queryName}") return;\n` +

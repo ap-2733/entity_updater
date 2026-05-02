@@ -1,7 +1,7 @@
 import { createTestStore } from "./testStore";
 import { productApi } from "../src/store/productApi";
-import { updateProductEntity } from "../src/store/updaters";
 import { deal1, deal2, product1, product2, review1, review2 } from "./mockData";
+import { updateEntity } from "../src/store/updateEntity";
 
 test("fetches and updates product", async () => {
   const store = createTestStore();
@@ -21,9 +21,10 @@ test("fetches and updates product", async () => {
   );
 
   await store.dispatch(
-    updateProductEntity({
-      filter: { _id: "69909bf8b3727d25467b2056" },
-      update: { name: "Updated Product Name" },
+    updateEntity({
+      typeName: 'Product',
+      id: "69909bf8b3727d25467b2056",
+      update: (draft) => { draft.name = "Updated Product Name"; },
     }),
   );
 

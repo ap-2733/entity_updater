@@ -64,6 +64,8 @@ entityListenerMiddleware.startListening({
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
+    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+      return;
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
@@ -148,6 +150,8 @@ entityListenerMiddleware.startListening({
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
+    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+      return;
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
@@ -236,6 +240,8 @@ entityListenerMiddleware.startListening({
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
+    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+      return;
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
@@ -352,6 +358,8 @@ entityListenerMiddleware.startListening({
 entityListenerMiddleware.startListening({
   matcher: productApi.internalActions.queryResultPatched.match,
   effect: (action, { getOriginalState, getState, dispatch }) => {
+    if ("fromEntityUpdate" in action.payload && action.payload.fromEntityUpdate)
+      return;
     const { queryCacheKey } = action.payload;
     const query = (getState() as any)[productApi.reducerPath]?.queries?.[
       queryCacheKey
