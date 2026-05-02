@@ -16,31 +16,32 @@ export function updateEntity(payload: {
     if (!byId) return;
 
     for (const [cacheKey, keyPaths] of Object.entries(byId)) {
-        const currentData = state[productApi.reducerPath].queries[cacheKey]?.data;
-        if (currentData == null) return;
+      const currentData = state[productApi.reducerPath].queries[cacheKey]?.data;
+      if (currentData == null) continue;
 
-        const [, patches, inversePatches] = produceWithPatches(
-          currentData as Record<string, unknown>,
-          (queryDraft: any) => {
-            for (const keyPath of keyPaths as (string | number)[][]) {
-              let item = queryDraft;
-              for (const segment of keyPath) {
-                item = item[segment];
-              }
-              if (item != null) payload.update(item);
+      const [, patches, inversePatches] = produceWithPatches(
+        currentData as Record<string, unknown>,
+        (queryDraft: any) => {
+          for (const keyPath of keyPaths as (string | number)[][]) {
+            let item: any = queryDraft;
+            for (const segment of keyPath) {
+              if (item == null) break;
+              item = item[segment];
             }
-          },
-        );
+            if (item != null) payload.update(item);
+          }
+        },
+      );
 
-        if (patches.length === 0) return;
-        dispatch(
-          (productApi.internalActions as any).queryResultPatched({
-            queryCacheKey: cacheKey,
-            patches,
-            inversePatches,
-            fromEntityUpdate: true,
-          }),
-        );
+      if (patches.length === 0) continue;
+      dispatch(
+        (productApi.internalActions as any).queryResultPatched({
+          queryCacheKey: cacheKey,
+          patches,
+          inversePatches,
+          fromEntityUpdate: true,
+        }),
+      );
     }
   };
 }

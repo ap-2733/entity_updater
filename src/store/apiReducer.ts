@@ -3,8 +3,8 @@ import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
 import { productApi } from "./productApi";
 import { entityLoaded, entityRemoved } from "./entityActions";
 
-function omit<T extends Record<string, unknown>>(obj: T, key: string): Omit<T, string> {
-  return Object.fromEntries(Object.entries(obj).filter(([k]) => k !== key)) as Omit<T, string>;
+function omit<T extends Record<string, unknown>>(obj: T, key: string): T {
+  return Object.fromEntries(Object.entries(obj).filter(([k]) => k !== key)) as T;
 }
 
 // keypaths within a single query cache entry where the entity appears
@@ -67,7 +67,7 @@ export function apiReducer(state: ApiState | undefined, action: UnknownAction): 
         const restByType = omit(byType, id);
         nextEntityMapping =
           Object.keys(restByType).length === 0
-            ? (omit(nextEntityMapping, entityType) as EntityMappingState)
+            ? omit(nextEntityMapping, entityType)
             : { ...nextEntityMapping, [entityType]: restByType };
       } else {
         nextEntityMapping = {
