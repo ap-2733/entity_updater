@@ -1,23 +1,62 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Product, Deal, Review } from "./productApi";
+import type {
+  User,
+  Repository,
+  Team,
+  Issue,
+  Comment,
+  PullRequest,
+  Commit,
+  ReviewThread,
+} from "./productApi";
 import { updateEntityInternal } from "./updateEntityInternal";
 
 export function updateEntity(payload: {
-  typeName: "Product";
+  typeName: "User";
   id: string;
-  update: (draft: Product) => void;
+  update: (draft: User) => void;
 }): ReturnType<typeof updateEntityInternal>;
 
 export function updateEntity(payload: {
-  typeName: "Deal";
+  typeName: "Repository";
   id: string;
-  update: (draft: Deal) => void;
+  update: (draft: Repository) => void;
 }): ReturnType<typeof updateEntityInternal>;
 
 export function updateEntity(payload: {
-  typeName: "Review";
+  typeName: "Team";
   id: string;
-  update: (draft: Review) => void;
+  update: (draft: Team) => void;
+}): ReturnType<typeof updateEntityInternal>;
+
+export function updateEntity(payload: {
+  typeName: "Issue";
+  id: string;
+  update: (draft: Issue) => void;
+}): ReturnType<typeof updateEntityInternal>;
+
+export function updateEntity(payload: {
+  typeName: "Comment";
+  id: string;
+  update: (draft: Comment) => void;
+}): ReturnType<typeof updateEntityInternal>;
+
+export function updateEntity(payload: {
+  typeName: "PullRequest";
+  id: string;
+  update: (draft: PullRequest) => void;
+}): ReturnType<typeof updateEntityInternal>;
+
+export function updateEntity(payload: {
+  typeName: "Commit";
+  id: string;
+  update: (draft: Commit) => void;
+}): ReturnType<typeof updateEntityInternal>;
+
+export function updateEntity(payload: {
+  typeName: "ReviewThread";
+  id: string;
+  update: (draft: ReviewThread) => void;
 }): ReturnType<typeof updateEntityInternal>;
 
 export function updateEntity(payload: {
