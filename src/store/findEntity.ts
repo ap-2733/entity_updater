@@ -1,0 +1,64 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { queryMap } from "./typeReachability";
+import { entityIdFields, EntityIdFields } from "./entityIdFields";
+
+type EntityTypeName = keyof EntityIdFields;
+
+type StackItem = {
+  data: any;
+  shape: string | Record<string, string>;
+  path: (string | number)[];
+};
+
+export function findEntity(
+  typeName: EntityTypeName,
+  id: string | number,
+  queries: Record<string, { endpointName: string; data: unknown }>,
+  callback: (queryCacheKey: string, keyPath: (string | number)[]) => void,
+): void {
+  const idField = entityIdFields[typeName];
+  const entityShape = (queryMap as any)[typeName] as
+    | Record<string, string>
+    | undefined;
+  const arrayShape = `${typeName}[]`;
+  const stack: StackItem[] = [];
+
+  for (const [queryCacheKey, query] of Object.entries(queries)) {
+    if (!query.data) continue;
+    const queryShape = (queryMap as any)[query.endpointName] as
+      | string
+      | Record<string, string>
+      | undefined;
+    if (!queryShape) continue;
+
+    stack.length = 0;
+    stack.push({ data: query.data, shape: queryShape, path: [] });
+
+    while (stack.length > 0) {
+      const { data, shape, path } = stack.pop()!;
+
+      if (typeof shape === "string") {
+        if (shape === typeName) {
+          if (data != null && data[idField] === id) {
+            callback(queryCacheKey, path);
+          }
+          if (data != null && entityShape) {
+            stack.push({ data, shape: entityShape, path });
+          }
+        } else if (shape === arrayShape) {
+          if (Array.isArray(data)) {
+            for (let i = data.length - 1; i >= 0; i--) {
+              stack.push({ data: data[i], shape: typeName, path: [...path, i] });
+            }
+          }
+        }
+      } else {
+        const fields = Object.entries(shape);
+        for (let i = fields.length - 1; i >= 0; i--) {
+          const [field, fieldShape] = fields[i];
+          stack.push({ data: data?.[field], shape: fieldShape, path: [...path, field] });
+        }
+      }
+    }
+  }
+}
