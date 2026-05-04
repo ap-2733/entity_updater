@@ -65,13 +65,15 @@ import type { EntityInfo } from "./collectEntityTypes";
  *   Plain object                — recurse into each property.
  *   Anything else               — return "" (primitive, function, etc.).
  */
-function generateWalk(
+export function generateWalk(
   checker: ts.TypeChecker,
   type: ts.Type,
   expr: string,
   kp: string,
   depth: number,
   entities: Map<string, EntityInfo>,
+  onEntity: (name: string, expr: string, kp: string) => string,
+  loopGuard = "",
 ): string {
   let core = type;
   let nullable = false;
@@ -90,29 +92,27 @@ function generateWalk(
   const elem = getArrayElementType(checker, core);
   if (elem) {
     const idx = `i${depth}`;
-    const inner = generateWalk(checker, elem, `${expr}[${idx}]`, `[...${kp}, ${idx}]`, depth + 1, entities);
+    const inner = generateWalk(checker, elem, `${expr}[${idx}]`, `[...${kp}, ${idx}]`, depth + 1, entities, onEntity, loopGuard);
     if (!inner) return "";
-    const loop = `for (let ${idx} = 0; ${idx} < ${expr}.length; ${idx}++) {\n${inner}\n}`;
+    const guardLine = loopGuard ? `${loopGuard}\n` : "";
+    const loop = `for (let ${idx} = 0; ${idx} < ${expr}.length; ${idx}++) {\n${guardLine}${inner}\n}`;
     return nullable ? `if (${expr} != null) {\n${loop}\n}` : loop;
   }
 
   if (isEntityType(checker, core)) {
     const name = core.aliasSymbol!.getName();
     if (entities.has(name)) {
-      // This entity has a known id field — delegate entirely to its traverse
-      // function, which will dispatch entityLoaded and then recurse into nested
-      // entities on its own.
-      const call = `traverse${name}(${expr}, ${kp});`;
-      return nullable ? `if (${expr} != null) {\n${call}\n}` : call;
+      const emit = onEntity(name, expr, kp);
+      if (!emit.trim()) return "";
+      return nullable ? `if (${expr} != null) {\n${emit}\n}` : emit;
     }
-    // Named alias without an id field (wrapper type).  We still want to reach
-    // any entities nested inside it, so walk its declared properties directly.
+    // Named alias without an id field (wrapper type) — walk its properties.
     const declared = checker.getDeclaredTypeOfSymbol(core.aliasSymbol!);
     const lines: string[] = [];
     for (const prop of declared.getProperties()) {
       const decl = prop.valueDeclaration ?? prop.declarations?.[0];
       if (!decl) continue;
-      const inner = generateWalk(checker, checker.getTypeOfSymbolAtLocation(prop, decl), `${expr}.${prop.getName()}`, `[...${kp}, "${prop.getName()}"]`, depth, entities);
+      const inner = generateWalk(checker, checker.getTypeOfSymbolAtLocation(prop, decl), `${expr}.${prop.getName()}`, `[...${kp}, "${prop.getName()}"]`, depth, entities, onEntity, loopGuard);
       if (inner) {
         lines.push(inner);
       }
@@ -128,7 +128,7 @@ function generateWalk(
     for (const prop of core.getProperties()) {
       const decl = prop.valueDeclaration ?? prop.declarations?.[0];
       if (!decl) continue;
-      const inner = generateWalk(checker, checker.getTypeOfSymbolAtLocation(prop, decl), `${expr}.${prop.getName()}`, `[...${kp}, "${prop.getName()}"]`, depth, entities);
+      const inner = generateWalk(checker, checker.getTypeOfSymbolAtLocation(prop, decl), `${expr}.${prop.getName()}`, `[...${kp}, "${prop.getName()}"]`, depth, entities, onEntity, loopGuard);
       if (inner) {
         lines.push(inner);
       }
@@ -142,61 +142,6 @@ function generateWalk(
 
 // ─── walker code generation ───────────────────────────────────────────────────
 
-/**
- * Generates a named `traverseXxx` inner function for use inside a walker.
- *
- * Instead of dispatching directly, it calls an `onXxx(item, keyPath)` callback
- * supplied by the listener effect.  This keeps the traversal structure (how to
- * navigate the response shape) independent of what the caller does when it
- * finds an entity — loading or removing a mapping entry.
- *
- * Because the function is named and defined before it is called, mutual
- * recursion (A → B → A) is also handled correctly at runtime.
- */
-function generateWalkerTraverseFunc(
-  checker: ts.TypeChecker,
-  info: EntityInfo,
-  entities: Map<string, EntityInfo>,
-): string {
-  const declared = checker.getDeclaredTypeOfSymbol(info.type.aliasSymbol!);
-  const propWalks = declared
-    .getProperties()
-    .map((prop) => {
-      const decl = prop.valueDeclaration ?? prop.declarations?.[0];
-      if (!decl) return "";
-      return generateWalk(
-        checker,
-        checker.getTypeOfSymbolAtLocation(prop, decl),
-        `item.${prop.getName()}`,
-        // Start each property path relative to the current entity's keyPath so
-        // that the stored keyPath always points to the entity within the full
-        // query result tree, not to a fixed absolute position.
-        `[...keyPath, "${prop.getName()}"]`,
-        0,
-        entities,
-      );
-    })
-    .filter(Boolean);
-
-  return (
-    `function traverse${info.name}(item: any, keyPath: (string | number)[]) {\n` +
-    `on${info.name}(item, keyPath);\n` +
-    `${propWalks.join("\n")}\n` +
-    `}`
-  );
-}
-
-/**
- * Analyses the response type and, if it contains entity types, builds a
- * standalone `walkXxx(data, onA, onB, …)` function that encapsulates the
- * traversal logic for one endpoint.
- *
- * Each `onXxx` parameter is a `(item, keyPath) => void` callback — both the
- * load side (which uses keyPath for entityLoaded) and the removal side (which
- * ignores it) share the exact same walker this way.
- *
- * Returns null when no entity types are reachable from the response.
- */
 function buildWalker(
   checker: ts.TypeChecker,
   queryName: string,
@@ -212,18 +157,57 @@ function buildWalker(
     .map((info) => `on${info.name}: (item: any, keyPath: (string | number)[]) => void`)
     .join(", ");
 
-  const traverseFuncs = entityList
-    .map((info) => generateWalkerTraverseFunc(checker, info, entities))
-    .join("\n\n");
+  const onEntityPush = (name: string, expr: string, kp: string) =>
+    `stack.push({ entityType: "${name}", item: ${expr}, keyPath: ${kp} });`;
 
-  // Root-walk code drives the traversal from `data` downward.  For a response
-  // like Product[] it emits a for-loop; for { product?: Product; reviews?: Review[] }
-  // it emits property-access + null-checks + nested loops as appropriate.
-  const rootWalk = generateWalk(checker, responseType, "data", "[]", 0, entities);
-  if (!rootWalk) return null;
+  // Seed: walk root response and push initial entity instances onto the stack.
+  const seed = generateWalk(checker, responseType, "data", "[]", 0, entities, onEntityPush);
+  if (!seed) return null;
+
+  // Loop body: one branch per entity type — invoke its callback then push any
+  // nested entities it contains so they are processed in subsequent iterations.
+  const branches = entityList.map((info) => {
+    const declared = checker.getDeclaredTypeOfSymbol(info.type.aliasSymbol!);
+    const propPushes = declared
+      .getProperties()
+      .map((prop) => {
+        const decl = prop.valueDeclaration ?? prop.declarations?.[0];
+        if (!decl) return "";
+        return generateWalk(
+          checker,
+          checker.getTypeOfSymbolAtLocation(prop, decl),
+          `item.${prop.getName()}`,
+          `[...keyPath, "${prop.getName()}"]`,
+          0,
+          entities,
+          onEntityPush,
+        );
+      })
+      .filter(Boolean);
+
+    return (
+      `if (entry.entityType === "${info.name}") {\n` +
+      `const { item, keyPath } = entry;\n` +
+      `on${info.name}(item, keyPath);\n` +
+      propPushes.join("\n") +
+      `\n}`
+    );
+  });
+
+  const stackType = entityList
+    .map((info) => `{ entityType: "${info.name}"; item: any; keyPath: (string | number)[] }`)
+    .join(" | ");
 
   const walkerName = `walk${queryName[0].toUpperCase()}${queryName.slice(1)}`;
-  const walkerCode = `function ${walkerName}(data: any, ${params}) {\n${traverseFuncs}\n${rootWalk}\n}`;
+  const walkerCode =
+    `function ${walkerName}(data: any, ${params}) {\n` +
+    `const stack: Array<${stackType}> = [];\n` +
+    seed + "\n" +
+    `while (stack.length > 0) {\n` +
+    `const entry = stack.shift()!;\n` +
+    branches.join(" else ") + "\n" +
+    `}\n` +
+    `}`;
   return { walkerName, walkerCode, entities };
 }
 

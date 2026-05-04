@@ -9,19 +9,29 @@ function walkGetProducts(
   data: any,
   onProduct: (item: any, keyPath: (string | number)[]) => void,
 ) {
-  function traverseProduct(item: any, keyPath: (string | number)[]) {
-    onProduct(item, keyPath);
-    if (item.relatedProducts != null) {
-      for (let i0 = 0; i0 < item.relatedProducts.length; i0++) {
-        traverseProduct(item.relatedProducts[i0], [
-          ...[...keyPath, "relatedProducts"],
-          i0,
-        ]);
+  const stack: Array<{
+    entityType: "Product";
+    item: any;
+    keyPath: (string | number)[];
+  }> = [];
+  for (let i0 = 0; i0 < data.length; i0++) {
+    stack.push({ entityType: "Product", item: data[i0], keyPath: [...[], i0] });
+  }
+  while (stack.length > 0) {
+    const entry = stack.shift()!;
+    if (entry.entityType === "Product") {
+      const { item, keyPath } = entry;
+      onProduct(item, keyPath);
+      if (item.relatedProducts != null) {
+        for (let i0 = 0; i0 < item.relatedProducts.length; i0++) {
+          stack.push({
+            entityType: "Product",
+            item: item.relatedProducts[i0],
+            keyPath: [...[...keyPath, "relatedProducts"], i0],
+          });
+        }
       }
     }
-  }
-  for (let i0 = 0; i0 < data.length; i0++) {
-    traverseProduct(data[i0], [...[], i0]);
   }
 }
 
@@ -123,11 +133,20 @@ function walkGetProductsDeals(
   data: any,
   onDeal: (item: any, keyPath: (string | number)[]) => void,
 ) {
-  function traverseDeal(item: any, keyPath: (string | number)[]) {
-    onDeal(item, keyPath);
-  }
+  const stack: Array<{
+    entityType: "Deal";
+    item: any;
+    keyPath: (string | number)[];
+  }> = [];
   for (let i0 = 0; i0 < data.length; i0++) {
-    traverseDeal(data[i0], [...[], i0]);
+    stack.push({ entityType: "Deal", item: data[i0], keyPath: [...[], i0] });
+  }
+  while (stack.length > 0) {
+    const entry = stack.shift()!;
+    if (entry.entityType === "Deal") {
+      const { item, keyPath } = entry;
+      onDeal(item, keyPath);
+    }
   }
 }
 
@@ -225,19 +244,29 @@ function walkGetProductsSearch(
   data: any,
   onProduct: (item: any, keyPath: (string | number)[]) => void,
 ) {
-  function traverseProduct(item: any, keyPath: (string | number)[]) {
-    onProduct(item, keyPath);
-    if (item.relatedProducts != null) {
-      for (let i0 = 0; i0 < item.relatedProducts.length; i0++) {
-        traverseProduct(item.relatedProducts[i0], [
-          ...[...keyPath, "relatedProducts"],
-          i0,
-        ]);
+  const stack: Array<{
+    entityType: "Product";
+    item: any;
+    keyPath: (string | number)[];
+  }> = [];
+  for (let i0 = 0; i0 < data.length; i0++) {
+    stack.push({ entityType: "Product", item: data[i0], keyPath: [...[], i0] });
+  }
+  while (stack.length > 0) {
+    const entry = stack.shift()!;
+    if (entry.entityType === "Product") {
+      const { item, keyPath } = entry;
+      onProduct(item, keyPath);
+      if (item.relatedProducts != null) {
+        for (let i0 = 0; i0 < item.relatedProducts.length; i0++) {
+          stack.push({
+            entityType: "Product",
+            item: item.relatedProducts[i0],
+            keyPath: [...[...keyPath, "relatedProducts"], i0],
+          });
+        }
       }
     }
-  }
-  for (let i0 = 0; i0 < data.length; i0++) {
-    traverseProduct(data[i0], [...[], i0]);
   }
 }
 
@@ -340,27 +369,43 @@ function walkGetProductsById(
   onProduct: (item: any, keyPath: (string | number)[]) => void,
   onReview: (item: any, keyPath: (string | number)[]) => void,
 ) {
-  function traverseProduct(item: any, keyPath: (string | number)[]) {
-    onProduct(item, keyPath);
-    if (item.relatedProducts != null) {
-      for (let i0 = 0; i0 < item.relatedProducts.length; i0++) {
-        traverseProduct(item.relatedProducts[i0], [
-          ...[...keyPath, "relatedProducts"],
-          i0,
-        ]);
-      }
-    }
-  }
-
-  function traverseReview(item: any, keyPath: (string | number)[]) {
-    onReview(item, keyPath);
-  }
+  const stack: Array<
+    | { entityType: "Product"; item: any; keyPath: (string | number)[] }
+    | { entityType: "Review"; item: any; keyPath: (string | number)[] }
+  > = [];
   if (data.product != null) {
-    traverseProduct(data.product, [...[], "product"]);
+    stack.push({
+      entityType: "Product",
+      item: data.product,
+      keyPath: [...[], "product"],
+    });
   }
   if (data.reviews != null) {
     for (let i0 = 0; i0 < data.reviews.length; i0++) {
-      traverseReview(data.reviews[i0], [...[...[], "reviews"], i0]);
+      stack.push({
+        entityType: "Review",
+        item: data.reviews[i0],
+        keyPath: [...[...[], "reviews"], i0],
+      });
+    }
+  }
+  while (stack.length > 0) {
+    const entry = stack.shift()!;
+    if (entry.entityType === "Product") {
+      const { item, keyPath } = entry;
+      onProduct(item, keyPath);
+      if (item.relatedProducts != null) {
+        for (let i0 = 0; i0 < item.relatedProducts.length; i0++) {
+          stack.push({
+            entityType: "Product",
+            item: item.relatedProducts[i0],
+            keyPath: [...[...keyPath, "relatedProducts"], i0],
+          });
+        }
+      }
+    } else if (entry.entityType === "Review") {
+      const { item, keyPath } = entry;
+      onReview(item, keyPath);
     }
   }
 }

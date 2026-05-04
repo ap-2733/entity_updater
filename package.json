@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "eslint && npx tsc --noEmit",
     "test": "jest",
-    "generate": "npx @rtk-query/codegen-openapi ./src/store/openapi-config.ts && node -r esbuild-runner/register src/scripts/generate.ts"
+    "generate": "npx @rtk-query/codegen-openapi ./src/store/openapi-config.ts && node -r esbuild-runner/register src/scripts/generate.ts",
+    "mapping": "npm run generate"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2"
