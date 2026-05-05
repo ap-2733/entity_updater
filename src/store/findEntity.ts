@@ -23,7 +23,6 @@ export function* findEntity(
   const entityShape = (queryMap as any)[typeName] as
     | Record<string, string>
     | undefined;
-  const arrayShape = `${typeName}[]`;
   const stack: StackItem[] = [];
 
   for (const [queryCacheKey, query] of Object.entries(queries)) {
@@ -62,8 +61,9 @@ export function* findEntity(
           if (data != null && entityShape) {
             stack.push({ data, shape: entityShape, path });
           }
-        } else if (shape === arrayShape) {
+        } else if (shape.endsWith("[]")) {
           if (Array.isArray(data)) {
+            const elementShape = shape.slice(0, -2);
             for (let i = data.length - 1; i >= 0; i--) {
               if (++counter % 1000 === 0) {
                 const now = performance.now();
@@ -74,10 +74,17 @@ export function* findEntity(
               }
               stack.push({
                 data: data[i],
-                shape: typeName,
+                shape: elementShape,
                 path: [...path, i],
               });
             }
+          }
+        } else {
+          const otherShape = (queryMap as any)[shape] as
+            | Record<string, string>
+            | undefined;
+          if (otherShape && data != null) {
+            stack.push({ data, shape: otherShape, path });
           }
         }
       } else {

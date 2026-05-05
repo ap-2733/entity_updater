@@ -6,7 +6,9 @@
     "lint": "eslint && npx tsc --noEmit",
     "test": "jest",
     "generate": "npx @rtk-query/codegen-openapi ./src/store/openapi-config.ts && node -r esbuild-runner/register src/scripts/generate.ts",
-    "mapping": "npm run generate"
+    "mapping": "npm run generate",
+    "serve": "node -r esbuild-runner/register src/scripts/server.ts",
+    "fake": "node -r esbuild-runner/register src/scripts/generateFakeData.ts"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2"
@@ -18,11 +20,13 @@
     "@babel/preset-typescript": "^7.28.5",
     "@faker-js/faker": "^10.4.0",
     "@rtk-query/codegen-openapi": "^2.2.0",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "babel-jest": "^30.2.0",
     "esbuild-runner": "^2.2.2",
     "eslint": "^9",
+    "express": "^5.2.1",
     "jest": "^30.2.0",
     "msw": "^2.12.10",
     "prettier": "3.8.1",
