@@ -1,17 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { productApi } from "@/src/store/productApi";
-import { apiReducer } from "@/src/store/apiReducer";
-import { entityListenerMiddleware } from "@/src/store/entityListeners";
+
 import { useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
   reducer: {
-    [productApi.reducerPath]: apiReducer,
+    [productApi.reducerPath]: productApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
-      .prepend(entityListenerMiddleware.middleware)
-      .concat(productApi.middleware),
+    getDefaultMiddleware().concat(productApi.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -129,7 +129,7 @@ async function writeQueryMapFile(
   );
 }
 
-export async function generateTypeReachability(
+export async function generateTypeSchema(
   apiFilePath: string,
   outputFilePath: string,
 ): Promise<void> {

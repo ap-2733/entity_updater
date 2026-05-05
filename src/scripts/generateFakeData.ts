@@ -3,14 +3,14 @@ import * as fs from "fs";
 import * as path from "path";
 
 const DEFAULTS = {
-  users: 100000,
-  repos: 15,
-  teams: 5,
-  issues: 30,
-  prs: 20,
-  commits: 40,
-  comments: 60,
-  threads: 15,
+  users: 10000,
+  repos: 10000,
+  teams: 10000,
+  issues: 10000,
+  prs: 10000,
+  commits: 10000,
+  comments: 10000,
+  threads: 10000,
   out: "db.json",
 };
 
