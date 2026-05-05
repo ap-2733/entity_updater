@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { queryMap } from "./typeReachability";
-import { entityIdFields, EntityIdFields } from "./entityIdFields";
+import { queryMap, entityIdFields, EntityIdFields } from "./apiMap";
 
 type EntityTypeName = keyof EntityIdFields;
 

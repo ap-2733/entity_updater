@@ -67,7 +67,26 @@ function serializeShape(shape: ShapeValue): string {
   return `{ ${entries} }`;
 }
 
-async function writeQueryMapFile(
+function canReachEntity(
+  shape: ShapeValue,
+  target: string,
+  entityShapeMap: Map<string, Record<string, string>>,
+  visited: Set<string>,
+): boolean {
+  if (typeof shape === "string") {
+    if (shape === target || shape === `${target}[]`) return true;
+    const base = shape.endsWith("[]") ? shape.slice(0, -2) : shape;
+    if (visited.has(base)) return false;
+    visited.add(base);
+    const sub = entityShapeMap.get(base);
+    return sub ? canReachEntity(sub, target, entityShapeMap, visited) : false;
+  }
+  return Object.values(shape).some((v) =>
+    canReachEntity(v, target, entityShapeMap, visited),
+  );
+}
+
+async function writeUnifiedFile(
   apiFilePath: string,
   outputFilePath: string,
 ): Promise<void> {
@@ -82,23 +101,14 @@ async function writeQueryMapFile(
     collectEntityTypes(checker, responseType, entities, new Set());
 
     const shape = describeShape(checker, responseType);
-    if (shape !== null) {
-      queryShapes.set(queryName, shape);
-    }
-
-    for (const [name, info] of entities) {
-      allEntities.set(name, info);
-    }
+    if (shape !== null) queryShapes.set(queryName, shape);
+    for (const [name, info] of entities) allEntities.set(name, info);
   });
 
   if (!queryShapes.size) return;
 
-  const lines: string[] = [];
-
-  for (const [name, shape] of queryShapes) {
-    lines.push(`  ${name}: ${serializeShape(shape)},`);
-  }
-
+  // Build entity sub-field shapes (reused for queryMap entries and entityQueries)
+  const entityShapeMap = new Map<string, Record<string, string>>();
   for (const [entityName, info] of allEntities) {
     const declared = checker.getDeclaredTypeOfSymbol(info.type.aliasSymbol!);
     const fields: Record<string, string> = {};
@@ -111,17 +121,46 @@ async function writeQueryMapFile(
         fields[prop.getName()] = shape;
       }
     }
-    if (Object.keys(fields).length > 0) {
-      const fieldStr = Object.entries(fields)
-        .map(([k, v]) => `${k}: "${v}"`)
-        .join(", ");
-      lines.push(`  ${entityName}: { ${fieldStr} },`);
+    if (Object.keys(fields).length > 0) entityShapeMap.set(entityName, fields);
+  }
+
+  // queryMap
+  const queryMapLines: string[] = [];
+  for (const [name, shape] of queryShapes) {
+    queryMapLines.push(`  ${name}: ${serializeShape(shape)},`);
+  }
+  for (const [entityName, fields] of entityShapeMap) {
+    const fieldStr = Object.entries(fields)
+      .map(([k, v]) => `${k}: "${v}"`)
+      .join(", ");
+    queryMapLines.push(`  ${entityName}: { ${fieldStr} },`);
+  }
+
+  // entityIdFields
+  const idFieldLines: string[] = [];
+  for (const [entityName, info] of allEntities) {
+    idFieldLines.push(`  ${entityName}: "${info.idField}",`);
+  }
+
+  // entityQueries
+  const entityQueriesLines: string[] = [];
+  for (const entityName of allEntities.keys()) {
+    const queries: string[] = [];
+    for (const [queryName, queryShape] of queryShapes) {
+      if (canReachEntity(queryShape, entityName, entityShapeMap, new Set())) {
+        queries.push(queryName);
+      }
     }
+    const list = queries.map((q) => `"${q}"`).join(", ");
+    entityQueriesLines.push(`  ${entityName}: [${list}],`);
   }
 
   const content =
-    `export const queryMap = {\n${lines.join("\n")}\n} as const;\n\n` +
-    `export type QueryMap = typeof queryMap;\n`;
+    `export const queryMap = {\n${queryMapLines.join("\n")}\n} as const;\n\n` +
+    `export type QueryMap = typeof queryMap;\n\n` +
+    `export const entityIdFields = {\n${idFieldLines.join("\n")}\n} as const;\n\n` +
+    `export type EntityIdFields = typeof entityIdFields;\n\n` +
+    `export const entityQueries: Record<string, string[]> = {\n${entityQueriesLines.join("\n")}\n};\n`;
 
   fs.writeFileSync(
     outputFilePath,
@@ -133,5 +172,5 @@ export async function generateTypeSchema(
   apiFilePath: string,
   outputFilePath: string,
 ): Promise<void> {
-  await writeQueryMapFile(apiFilePath, outputFilePath);
+  await writeUnifiedFile(apiFilePath, outputFilePath);
 }
