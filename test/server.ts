@@ -1,50 +1,38 @@
 import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
 import {
-  deal1,
-  deal2,
-  product1,
-  product2,
-  product3,
-  review1,
-  review2,
+  user1,
+  user2,
+  user3,
+  comment1,
+  comment2,
+  issue1,
+  reviewThread1,
+  reviewThread2,
+  repo2,
 } from "@/test/mockData";
 
 export const server = setupServer(
-  http.get("http://localhost:3000/api/products", () => {
-    return HttpResponse.json([product1, product2, product3]);
+  http.get("http://localhost:3000/api/users", () => {
+    return HttpResponse.json([user1, user2, user3]);
   }),
-  http.get("http://localhost:3000/api/products/deals", () => {
-    return HttpResponse.json([deal1, deal2]);
+  http.get("http://localhost:3000/api/users/search", () => {
+    return HttpResponse.json([user1]);
   }),
-  http.get(
-    "http://localhost:3000/api/products/69909bf8b3727d25467b2056",
-    () => {
-      return HttpResponse.json({
-        product: product1,
-        reviews: [review1, review2],
-      });
-    },
-  ),
-  http.get(
-    "http://localhost:3000/api/products/69909bf8b3727d25467b2057",
-    () => {
-      return HttpResponse.json({
-        product: product2,
-        reviews: [],
-      });
-    },
-  ),
-  http.get(
-    "http://localhost:3000/api/products/69909bf8b3727d25467b2058",
-    () => {
-      return HttpResponse.json({
-        product: product3,
-        reviews: [],
-      });
-    },
-  ),
-  http.get("http://localhost:3000/api/products/search", () => {
-    return HttpResponse.json([product1]);
+  http.get("http://localhost:3000/api/users/user001", () => {
+    return HttpResponse.json({ user: user1, followers: [], following: [] });
+  }),
+  http.get("http://localhost:3000/api/issues/issue001", () => {
+    return HttpResponse.json({
+      issue: issue1,
+      comments: [comment1, comment2],
+      linkedPullRequests: [],
+    });
+  }),
+  http.get("http://localhost:3000/api/pullRequests/pr001/reviews", () => {
+    return HttpResponse.json([reviewThread1, reviewThread2]);
+  }),
+  http.get("http://localhost:3000/api/repositories/repo002", () => {
+    return HttpResponse.json({ repository: repo2, collaborators: [], forks: [] });
   }),
 );

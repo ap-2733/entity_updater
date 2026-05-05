@@ -10,13 +10,16 @@ type StackItem = {
   path: (string | number)[];
 };
 
-export function findEntity(
+export function* findEntity(
   typeName: EntityTypeName,
   id: string | number,
   queries: Record<string, { endpointName: string; data: unknown }>,
   callback: (queryCacheKey: string, keyPath: (string | number)[]) => void,
-): void {
+  timeoutMs: number,
+): Generator<void> {
   const idField = entityIdFields[typeName];
+  let deadline = performance.now() + timeoutMs;
+  let counter = 0;
   const entityShape = (queryMap as any)[typeName] as
     | Record<string, string>
     | undefined;
@@ -24,6 +27,13 @@ export function findEntity(
   const stack: StackItem[] = [];
 
   for (const [queryCacheKey, query] of Object.entries(queries)) {
+    if (++counter % 1000 === 0) {
+      const now = performance.now();
+      if (now > deadline) {
+        deadline = now + timeoutMs;
+        timeoutMs = yield;
+      }
+    }
     if (!query.data) continue;
     const queryShape = (queryMap as any)[query.endpointName] as
       | string
@@ -35,6 +45,13 @@ export function findEntity(
     stack.push({ data: query.data, shape: queryShape, path: [] });
 
     while (stack.length > 0) {
+      if (++counter % 1000 === 0) {
+        const now = performance.now();
+        if (now > deadline) {
+          deadline = now + timeoutMs;
+          timeoutMs = yield;
+        }
+      }
       const { data, shape, path } = stack.pop()!;
 
       if (typeof shape === "string") {
@@ -48,15 +65,37 @@ export function findEntity(
         } else if (shape === arrayShape) {
           if (Array.isArray(data)) {
             for (let i = data.length - 1; i >= 0; i--) {
-              stack.push({ data: data[i], shape: typeName, path: [...path, i] });
+              if (++counter % 1000 === 0) {
+                const now = performance.now();
+                if (now > deadline) {
+                  deadline = now + timeoutMs;
+                  timeoutMs = yield;
+                }
+              }
+              stack.push({
+                data: data[i],
+                shape: typeName,
+                path: [...path, i],
+              });
             }
           }
         }
       } else {
         const fields = Object.entries(shape);
         for (let i = fields.length - 1; i >= 0; i--) {
+          if (++counter % 1000 === 0) {
+            const now = performance.now();
+            if (now > deadline) {
+              deadline = now + timeoutMs;
+              timeoutMs = yield;
+            }
+          }
           const [field, fieldShape] = fields[i];
-          stack.push({ data: data?.[field], shape: fieldShape, path: [...path, field] });
+          stack.push({
+            data: data?.[field],
+            shape: fieldShape,
+            path: [...path, field],
+          });
         }
       }
     }

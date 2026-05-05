@@ -16,6 +16,7 @@
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
+    "@faker-js/faker": "^10.4.0",
     "@rtk-query/codegen-openapi": "^2.2.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",

@@ -1,91 +1,119 @@
-export const product1 = {
-  _id: "69909bf8b3727d25467b2056",
-  name: "Chain Crossbody Clutch",
-  brand: "ALDO",
-  category: "bags",
-  price: 79.99,
-  stock: 22,
-  description: "Clutch with removable chain strap and glossy enamel body.",
-  image: "/bags/bags8.jpg",
-  rating: 4.3,
-  numReviews: 88,
-  createdAt: "2026-02-14T15:59:52.140Z",
-  __v: 0,
+export const user1 = {
+  _id: "user001",
+  username: "alice",
+  email: "alice@example.com",
+  displayName: "Alice",
 };
 
-export const product2 = {
-  _id: "69909bf8b3727d25467b2057",
-  name: "Slim Leather Bifold Wallet",
-  brand: "Fossil",
-  category: "accessories",
-  price: 49.99,
-  stock: 54,
-  description: "Minimalist bifold wallet in full-grain leather.",
-  image: "/accessories/wallet1.jpg",
-  rating: 4.7,
-  numReviews: 213,
-  createdAt: "2026-03-01T10:22:11.000Z",
-  __v: 0,
-  relatedProducts: [product1],
+export const user2 = {
+  _id: "user002",
+  username: "bob",
+  email: "bob@example.com",
+  displayName: "Bob",
+  followers: [user1],
 };
 
-export const product3 = {
-  _id: "69909bf8b3727d25467b2058",
-  name: "Canvas Weekender Bag",
-  brand: "Herschel",
-  category: "bags",
-  price: 129.99,
-  stock: 15,
-  description: "Durable waxed-canvas bag with shoe compartment.",
-  image: "/bags/weekender2.jpg",
-  rating: 4.5,
-  numReviews: 97,
-  createdAt: "2026-03-10T08:45:00.000Z",
-  __v: 0,
+export const user3 = {
+  _id: "user003",
+  username: "carol",
+  email: "carol@example.com",
+  displayName: "Carol",
 };
 
-export const review1 = {
-  _id: "review001",
-  userId: { _id: "user001", name: "Alice" },
-  productId: "69909bf8b3727d25467b2056",
-  rating: 5,
-  comment: "Great bag, holds everything!",
-  createdAt: "2026-03-01T10:00:00.000Z",
+export const repo1 = {
+  _id: "repo001",
+  name: "awesome-project",
+  fullName: "alice/awesome-project",
 };
 
-export const review2 = {
-  _id: "review002",
-  userId: { _id: "user002", name: "Bob" },
-  productId: "69909bf8b3727d25467b2056",
-  rating: 4,
-  comment: "Nice quality, a bit small.",
-  createdAt: "2026-03-05T14:30:00.000Z",
+export const repo2 = {
+  _id: "repo002",
+  name: "forked-project",
+  fullName: "bob/forked-project",
+  parentFork: repo1,
 };
 
-export const deal1 = {
-  _id: "deal001",
-  name: "Chain Crossbody Clutch — Summer Sale",
-  brand: "ALDO",
-  category: "bags",
-  description: "Summer discount on the iconic chain clutch.",
-  image: "/bags/bags8.jpg",
-  originalPrice: 79.99,
-  discountPercentage: 20,
-  dealPrice: 63.99,
-  stock: 10,
-  isActive: true,
+export const repo3 = {
+  _id: "repo003",
+  name: "another-project",
+  fullName: "carol/another-project",
 };
 
-export const deal2 = {
-  _id: "deal002",
-  name: "Canvas Weekender Bag — Clearance",
-  brand: "Herschel",
-  category: "bags",
-  description: "End-of-season clearance on the weekender.",
-  image: "/bags/weekender2.jpg",
-  originalPrice: 129.99,
-  discountPercentage: 30,
-  dealPrice: 90.99,
-  stock: 5,
-  isActive: true,
+export const team1 = {
+  _id: "team001",
+  name: "Core Team",
+  slug: "core-team",
+};
+
+export const team2 = {
+  _id: "team002",
+  name: "Frontend Team",
+  slug: "frontend-team",
+  subTeams: [team1],
+};
+
+export const issue1 = {
+  _id: "issue001",
+  title: "Fix login bug",
+  state: "open" as const,
+};
+
+export const issue2 = {
+  _id: "issue002",
+  title: "Update documentation",
+  state: "closed" as const,
+};
+
+export const comment1 = {
+  _id: "comment001",
+  body: "This looks great!",
+};
+
+export const comment2 = {
+  _id: "comment002",
+  body: "I agree.",
+};
+
+export const commentWithReply = {
+  _id: "comment003",
+  body: "Needs another look.",
+  replies: [comment1],
+};
+
+export const pr1 = {
+  _id: "pr001",
+  title: "Add user authentication",
+  state: "open" as const,
+};
+
+export const pr2 = {
+  _id: "pr002",
+  title: "Fix typos in README",
+  state: "merged" as const,
+};
+
+export const commit1 = {
+  _id: "commit001",
+  hash: "abc1234",
+  message: "Initial commit",
+};
+
+export const commit2 = {
+  _id: "commit002",
+  hash: "def5678",
+  message: "Add tests",
+};
+
+export const reviewThread1 = {
+  _id: "rt001",
+  filePath: "src/auth.ts",
+  line: 42,
+  isResolved: false,
+};
+
+export const reviewThread2 = {
+  _id: "rt002",
+  filePath: "src/index.ts",
+  line: 10,
+  isResolved: true,
 };

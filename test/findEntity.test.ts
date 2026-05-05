@@ -1,209 +1,305 @@
 import { findEntity } from "../src/store/findEntity";
 import {
-  product1,
-  product2,
-  product3,
-  deal1,
-  deal2,
-  review1,
-  review2,
+  user1,
+  user2,
+  user3,
+  repo1,
+  repo2,
+  repo3,
+  issue1,
+  comment1,
+  comment2,
+  commentWithReply,
+  reviewThread1,
+  reviewThread2,
 } from "./mockData";
 
+function drain(gen: Generator<void>): void {
+  while (!gen.next().done) {}
+}
+
 describe("findEntity", () => {
-  describe("Product – getProducts / getProductsSearch", () => {
-    it("reports queryCacheKey and keyPath [index] for a matching product", () => {
-      const cacheKey = 'getProducts({"skip":0})';
+  describe("User – getUsers / getUsersSearch", () => {
+    it("reports queryCacheKey and keyPath [index] for a matching user", () => {
+      const cacheKey = 'getUsers({"skip":0})';
       const queries = {
-        [cacheKey]: { endpointName: "getProducts", data: [product1, product3] },
+        [cacheKey]: { endpointName: "getUsers", data: [user1, user3] },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Product", product1._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [0] }]);
     });
 
-    it("reports only the product whose id matches, not others in the same array", () => {
-      const cacheKey = "getProducts({})";
+    it("reports only the user whose id matches, not others in the same array", () => {
+      const cacheKey = "getUsers({})";
       const queries = {
-        [cacheKey]: { endpointName: "getProducts", data: [product1, product3] },
+        [cacheKey]: { endpointName: "getUsers", data: [user1, user3] },
       };
       const callback = jest.fn();
 
-      findEntity("Product", product1._id, queries, callback);
+      drain(findEntity("User", user1._id, queries, callback, Infinity));
 
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith(cacheKey, [0]);
     });
 
-    it("getProductsSearch uses the same traversal as getProducts", () => {
-      const cacheKey = 'getProductsSearch({"name":"bag"})';
+    it("getUsersSearch uses the same traversal as getUsers", () => {
+      const cacheKey = 'getUsersSearch({"q":"carol"})';
       const queries = {
-        [cacheKey]: { endpointName: "getProductsSearch", data: [product3] },
+        [cacheKey]: { endpointName: "getUsersSearch", data: [user3] },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Product", product3._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("User", user3._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [0] }]);
     });
 
-    it("finds the entity at its direct position and inside relatedProducts", () => {
-      const cacheKey = "getProducts({})";
+    it("finds the entity at its direct position and inside followers", () => {
+      const cacheKey = "getUsers({})";
       const queries = {
-        [cacheKey]: { endpointName: "getProducts", data: [product1, product2] },
+        [cacheKey]: { endpointName: "getUsers", data: [user1, user2] },
       };
       const keyPaths: (string | number)[][] = [];
 
-      findEntity("Product", product1._id, queries, (_key, kp) => keyPaths.push(kp));
+      drain(findEntity("User", user1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity));
 
       expect(keyPaths).toEqual([
         [0],
-        [1, "relatedProducts", 0],
+        [1, "followers", 0],
       ]);
     });
 
-    it("finds a product that only appears via relatedProducts", () => {
-      const cacheKey = "getProducts({})";
+    it("finds a user that only appears via followers", () => {
+      const cacheKey = "getUsers({})";
       const queries = {
-        [cacheKey]: { endpointName: "getProducts", data: [product2] },
+        [cacheKey]: { endpointName: "getUsers", data: [user2] },
       };
       const keyPaths: (string | number)[][] = [];
 
-      findEntity("Product", product1._id, queries, (_key, kp) => keyPaths.push(kp));
+      drain(findEntity("User", user1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity));
 
-      expect(keyPaths).toEqual([[0, "relatedProducts", 0]]);
+      expect(keyPaths).toEqual([[0, "followers", 0]]);
     });
   });
 
-  describe("Product – getProductsById", () => {
-    it("reports keyPath ['product'] for a matching product", () => {
-      const cacheKey = 'getProductsById({"id":"abc"})';
+  describe("User – getUsersById", () => {
+    it("reports keyPath ['user'] for a matching user", () => {
+      const cacheKey = 'getUsersById({"id":"u1"})';
       const queries = {
         [cacheKey]: {
-          endpointName: "getProductsById",
-          data: { product: product1, reviews: [review1] },
+          endpointName: "getUsersById",
+          data: { user: user1, followers: [], following: [] },
         },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Product", product1._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
-      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["product"] }]);
+      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["user"] }]);
     });
 
-    it("reports nothing when the product id does not match", () => {
-      const cacheKey = 'getProductsById({"id":"abc"})';
+    it("reports nothing when the user id does not match", () => {
+      const cacheKey = 'getUsersById({"id":"u1"})';
       const queries = {
         [cacheKey]: {
-          endpointName: "getProductsById",
-          data: { product: product1, reviews: [review1] },
+          endpointName: "getUsersById",
+          data: { user: user1, followers: [], following: [] },
         },
       };
       const callback = jest.fn();
 
-      findEntity("Product", "nonexistent-id", queries, callback);
+      drain(findEntity("User", "nonexistent-id", queries, callback, Infinity));
 
       expect(callback).not.toHaveBeenCalled();
     });
 
-    it("finds a product nested in getProductsById.product.relatedProducts", () => {
-      const cacheKey = 'getProductsById({"id":"p2"})';
+    it("finds a user in the followers array", () => {
+      const cacheKey = 'getUsersById({"id":"u3"})';
       const queries = {
         [cacheKey]: {
-          endpointName: "getProductsById",
-          data: { product: product2, reviews: [] },
+          endpointName: "getUsersById",
+          data: { user: user3, followers: [user1], following: [] },
+        },
+      };
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+
+      drain(
+        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
+      );
+
+      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["followers", 0] }]);
+    });
+  });
+
+  describe("Repository – getRepositories", () => {
+    it("reports queryCacheKey and keyPath [index] for a matching repository", () => {
+      const cacheKey = "getRepositories({})";
+      const queries = {
+        [cacheKey]: { endpointName: "getRepositories", data: [repo1, repo3] },
+      };
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+
+      drain(
+        findEntity("Repository", repo1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
+      );
+
+      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [0] }]);
+    });
+
+    it("finds a repository that only appears via parentFork", () => {
+      const cacheKey = "getRepositories({})";
+      const queries = {
+        [cacheKey]: { endpointName: "getRepositories", data: [repo2] },
+      };
+      const keyPaths: (string | number)[][] = [];
+
+      drain(findEntity("Repository", repo1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity));
+
+      expect(keyPaths).toEqual([[0, "parentFork"]]);
+    });
+  });
+
+  describe("Repository – getRepositoriesById", () => {
+    it("reports keyPath ['repository'] for a matching repository", () => {
+      const cacheKey = 'getRepositoriesById({"id":"r1"})';
+      const queries = {
+        [cacheKey]: {
+          endpointName: "getRepositoriesById",
+          data: { repository: repo1, collaborators: [], forks: [] },
+        },
+      };
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+
+      drain(
+        findEntity("Repository", repo1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
+      );
+
+      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["repository"] }]);
+    });
+
+    it("finds a fork at ['forks', index]", () => {
+      const cacheKey = 'getRepositoriesById({"id":"r3"})';
+      const queries = {
+        [cacheKey]: {
+          endpointName: "getRepositoriesById",
+          data: { repository: repo3, collaborators: [], forks: [repo1] },
         },
       };
       const keyPaths: (string | number)[][] = [];
 
-      findEntity("Product", product1._id, queries, (_key, kp) => keyPaths.push(kp));
+      drain(findEntity("Repository", repo1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity));
 
-      expect(keyPaths).toEqual([["product", "relatedProducts", 0]]);
+      expect(keyPaths).toEqual([["forks", 0]]);
     });
   });
 
-  describe("Deal – getProductsDeals", () => {
-    it("reports queryCacheKey and keyPath [index] for a matching deal", () => {
-      const cacheKey = "getProductsDeals(undefined)";
+  describe("ReviewThread – getPullRequestsByIdReviews", () => {
+    it("reports queryCacheKey and keyPath [index] for a matching review thread", () => {
+      const cacheKey = 'getPullRequestsByIdReviews({"id":"pr1"})';
       const queries = {
-        [cacheKey]: { endpointName: "getProductsDeals", data: [deal1, deal2] },
+        [cacheKey]: {
+          endpointName: "getPullRequestsByIdReviews",
+          data: [reviewThread1, reviewThread2],
+        },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Deal", deal2._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("ReviewThread", reviewThread2._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [1] }]);
     });
 
-    it("does not report deals when searching for Product", () => {
-      const cacheKey = "getProductsDeals(undefined)";
+    it("does not report review threads when searching for Issue", () => {
+      const cacheKey = 'getPullRequestsByIdReviews({"id":"pr1"})';
       const queries = {
-        [cacheKey]: { endpointName: "getProductsDeals", data: [deal1, deal2] },
+        [cacheKey]: {
+          endpointName: "getPullRequestsByIdReviews",
+          data: [reviewThread1, reviewThread2],
+        },
       };
       const callback = jest.fn();
 
-      findEntity("Product", product1._id, queries, callback);
+      drain(findEntity("Issue", issue1._id, queries, callback, Infinity));
 
       expect(callback).not.toHaveBeenCalled();
     });
   });
 
-  describe("Review – getProductsById", () => {
-    it("reports keyPath ['reviews', index] for a matching review", () => {
-      const cacheKey = 'getProductsById({"id":"abc"})';
+  describe("Comment – getIssuesById", () => {
+    it("reports keyPath ['comments', index] for a matching comment", () => {
+      const cacheKey = 'getIssuesById({"id":"i1"})';
       const queries = {
         [cacheKey]: {
-          endpointName: "getProductsById",
-          data: { product: product1, reviews: [review1, review2] },
+          endpointName: "getIssuesById",
+          data: { issue: issue1, comments: [comment1, comment2], linkedPullRequests: [] },
         },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Review", review2._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("Comment", comment2._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
-      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["reviews", 1] }]);
+      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["comments", 1] }]);
     });
 
-    it("does not report the product field when searching for Review", () => {
-      const cacheKey = 'getProductsById({"id":"abc"})';
+    it("finds a comment nested in replies", () => {
+      const cacheKey = 'getIssuesById({"id":"i1"})';
       const queries = {
         [cacheKey]: {
-          endpointName: "getProductsById",
-          data: { product: product1, reviews: [review1] },
+          endpointName: "getIssuesById",
+          data: { issue: issue1, comments: [commentWithReply], linkedPullRequests: [] },
         },
       };
-      const callback = jest.fn();
+      const keyPaths: (string | number)[][] = [];
 
-      findEntity("Review", review1._id, queries, callback);
+      drain(findEntity("Comment", comment1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity));
 
-      expect(callback).toHaveBeenCalledTimes(1);
-      expect(callback).toHaveBeenCalledWith(cacheKey, ["reviews", 0]);
+      expect(keyPaths).toEqual([["comments", 0, "replies", 0]]);
     });
   });
 
   describe("multiple cache entries", () => {
     it("finds the same entity across all cache entries that contain it", () => {
-      const key1 = 'getProducts({"skip":0})';
-      const key2 = 'getProductsSearch({"name":"bag"})';
+      const key1 = 'getUsers({"skip":0})';
+      const key2 = 'getUsersSearch({"q":"alice"})';
       const queries = {
-        [key1]: { endpointName: "getProducts", data: [product1] },
-        [key2]: { endpointName: "getProductsSearch", data: [product1] },
+        [key1]: { endpointName: "getUsers", data: [user1] },
+        [key2]: { endpointName: "getUsersSearch", data: [user1] },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Product", product1._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
       expect(results).toEqual([
@@ -212,72 +308,133 @@ describe("findEntity", () => {
       ]);
     });
 
-    it("reports both the product query and the by-id query", () => {
-      const key1 = "getProducts({})";
-      const key2 = 'getProductsById({"id":"p1"})';
+    it("reports both the list query and the by-id query", () => {
+      const key1 = "getUsers({})";
+      const key2 = 'getUsersById({"id":"u1"})';
       const queries = {
-        [key1]: { endpointName: "getProducts", data: [product1] },
+        [key1]: { endpointName: "getUsers", data: [user1] },
         [key2]: {
-          endpointName: "getProductsById",
-          data: { product: product1, reviews: [review1] },
+          endpointName: "getUsersById",
+          data: { user: user1, followers: [], following: [] },
         },
       };
       const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
 
-      findEntity("Product", product1._id, queries, (queryCacheKey, keyPath) =>
-        results.push({ queryCacheKey, keyPath }),
+      drain(
+        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
+          results.push({ queryCacheKey, keyPath }),
+        Infinity),
       );
 
       expect(results).toEqual([
         { queryCacheKey: key1, keyPath: [0] },
-        { queryCacheKey: key2, keyPath: ["product"] },
+        { queryCacheKey: key2, keyPath: ["user"] },
       ]);
     });
   });
 
   describe("edge cases", () => {
     it("skips queries with null data", () => {
-      const queries = { key: { endpointName: "getProducts", data: null } };
+      const queries = { key: { endpointName: "getUsers", data: null } };
       const callback = jest.fn();
 
-      findEntity("Product", product1._id, queries, callback);
+      drain(findEntity("User", user1._id, queries, callback, Infinity));
 
       expect(callback).not.toHaveBeenCalled();
     });
 
     it("handles an empty data array", () => {
-      const queries = { key: { endpointName: "getProducts", data: [] } };
+      const queries = { key: { endpointName: "getUsers", data: [] } };
       const callback = jest.fn();
 
-      findEntity("Product", product1._id, queries, callback);
+      drain(findEntity("User", user1._id, queries, callback, Infinity));
 
       expect(callback).not.toHaveBeenCalled();
     });
 
     it("skips queries with an unknown endpointName", () => {
       const queries = {
-        key: { endpointName: "unknownEndpoint", data: [product1] },
+        key: { endpointName: "unknownEndpoint", data: [user1] },
       };
       const callback = jest.fn();
 
-      findEntity("Product", product1._id, queries, callback);
+      drain(findEntity("User", user1._id, queries, callback, Infinity));
 
       expect(callback).not.toHaveBeenCalled();
     });
 
-    it("handles getProductsById with null product field", () => {
-      const cacheKey = 'getProductsById({"id":"abc"})';
+    it("handles getIssuesById with null issue field", () => {
+      const cacheKey = 'getIssuesById({"id":"i1"})';
       const queries = {
         [cacheKey]: {
-          endpointName: "getProductsById",
-          data: { product: null, reviews: [] },
+          endpointName: "getIssuesById",
+          data: { issue: null, comments: [], linkedPullRequests: [] },
         },
       };
       const callback = jest.fn();
 
-      findEntity("Product", product1._id, queries, callback);
+      drain(findEntity("Issue", issue1._id, queries, callback, Infinity));
 
       expect(callback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("timeout / yield", () => {
+    it("completes in a single next() call when timeout is ample", () => {
+      const queries = { key: { endpointName: "getUsers", data: [user1] } };
+      const gen = findEntity("User", user1._id, queries, jest.fn(), Infinity);
+
+      expect(gen.next().done).toBe(true);
+    });
+
+    it("yields (done=false) when performance.now exceeds deadline", () => {
+      const spy = jest.spyOn(performance, "now")
+        .mockReturnValueOnce(0)
+        .mockReturnValue(100);
+
+      const queries = Object.fromEntries(
+        Array.from({ length: 1000 }, (_, i) => [
+          `key${i}`,
+          { endpointName: "getUsers", data: [] },
+        ]),
+      );
+      const gen = findEntity("User", user1._id, queries, jest.fn(), 1);
+
+      expect(gen.next().done).toBe(false);
+
+      spy.mockRestore();
+    });
+
+    it("resumes after yield and completes with the full result", () => {
+      const spy = jest.spyOn(performance, "now")
+        .mockReturnValueOnce(0)
+        .mockReturnValueOnce(100)
+        .mockReturnValue(0);
+
+      const queries = Object.fromEntries(
+        Array.from({ length: 1000 }, (_, i) => [
+          `key${i}`,
+          { endpointName: "getUsers", data: i === 999 ? [user1] : [] },
+        ]),
+      );
+      const found: string[] = [];
+      const gen = findEntity(
+        "User",
+        user1._id,
+        queries,
+        (_key, kp) => found.push(String(kp[0])),
+        1,
+      );
+
+      const r1 = gen.next();
+      expect(r1.done).toBe(false);
+      expect(found).toHaveLength(0);
+
+      const r2 = gen.next();
+      expect(r2.done).toBe(true);
+      expect(found).toEqual(["0"]);
+
+      spy.mockRestore();
     });
   });
 });

@@ -1,0 +1,20 @@
+{
+  "/users/search": "/users",
+  "/users/:id": "/users?_id=:id",
+  "/users/:id/repositories": "/repositories?owner._id=:id",
+  "/users/:id/teams": "/teams",
+  "/users/:id/issues": "/issues?author._id=:id",
+  "/users/:id/pullRequests": "/pullRequests?author._id=:id",
+
+  "/repositories/search": "/repositories",
+  "/repositories/:id/stargazers": "/users",
+  "/repositories/:id/issues": "/issues?repository._id=:id",
+  "/repositories/:id/pullRequests": "/pullRequests?repository._id=:id",
+  "/repositories/:id/commits": "/commits",
+
+  "/issues/search": "/issues",
+  "/issues/:id/comments": "/comments",
+
+  "/pullRequests/:id/reviews": "/reviewThreads?pullRequest._id=:id",
+  "/pullRequests/:id/comments": "/comments"
+}
