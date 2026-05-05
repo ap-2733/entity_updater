@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { queryMap, entityIdFields, EntityIdFields } from "./apiMap";
+import { queryMap, entityIdFields, entityQueries, EntityIdFields } from "./apiMap";
 
 type EntityTypeName = keyof EntityIdFields;
 
@@ -22,6 +22,7 @@ export function* findEntity(
   const entityShape = (queryMap as any)[typeName] as
     | Record<string, string>
     | undefined;
+  const relevantEndpoints = new Set(entityQueries[typeName] ?? []);
   const stack: StackItem[] = [];
 
   for (const [queryCacheKey, query] of Object.entries(queries)) {
@@ -33,6 +34,7 @@ export function* findEntity(
       }
     }
     if (!query.data) continue;
+    if (!relevantEndpoints.has(query.endpointName)) continue;
     const queryShape = (queryMap as any)[query.endpointName] as
       | string
       | Record<string, string>
