@@ -148,10 +148,12 @@ async function writeUnifiedFile(
     queryMapLines.push(`  ${entityName}: { ${fieldStr} },`);
   }
 
-  // mutationsMap
+  // mutationsMap - POST mutations are excluded (they create new entities, not update cached ones)
   const mutationsMapLines: string[] = [];
   for (const [name, shape] of mutationShapes) {
-    mutationsMapLines.push(`  ${name}: ${serializeShape(shape)},`);
+    if (name.startsWith("patch") || name.startsWith("put")) {
+      mutationsMapLines.push(`  ${name}: ${serializeShape(shape)},`);
+    }
   }
 
   // entityIdFields

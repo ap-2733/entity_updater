@@ -97,8 +97,6 @@ export const mutationsMap = {
   patchIssuesById: "Issue",
   putPullRequestsById: "PullRequest",
   patchPullRequestsById: "PullRequest",
-  postIssuesByIdComments: "Comment",
-  postPullRequestsByIdComments: "Comment",
 } as const;
 
 export type MutationsMap = typeof mutationsMap;

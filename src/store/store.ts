@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { productApi } from "@/src/store/productApi";
+import { mutationListenerMiddleware } from "@/src/store/mutationListeners";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -8,7 +9,9 @@ export const store = configureStore({
     [productApi.reducerPath]: productApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({serializableCheck: false}).concat(productApi.middleware),
+    getDefaultMiddleware({ serializableCheck: false })
+      .concat(mutationListenerMiddleware.middleware)
+      .concat(productApi.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
