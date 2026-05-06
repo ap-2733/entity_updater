@@ -8,7 +8,8 @@
     "generate": "npx @rtk-query/codegen-openapi ./src/store/openapi-config.ts && node -r esbuild-runner/register src/scripts/generate.ts",
     "mapping": "npm run generate",
     "serve": "node -r esbuild-runner/register src/scripts/server.ts",
-    "fake": "node -r esbuild-runner/register src/scripts/generateFakeData.ts"
+    "fake": "node -r esbuild-runner/register src/scripts/generateFakeData.ts",
+    "test2": "node -r esbuild-runner/register src/scripts/manual_test.ts"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2"

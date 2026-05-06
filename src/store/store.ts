@@ -8,7 +8,7 @@ export const store = configureStore({
     [productApi.reducerPath]: productApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(productApi.middleware),
+    getDefaultMiddleware({serializableCheck: false}).concat(productApi.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
@@ -18,3 +18,4 @@ export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 export const useAppSelector = useSelector.withTypes<RootState>();
+
