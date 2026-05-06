@@ -7,6 +7,7 @@ import { enablePatches } from "immer";
 import { updateEntity } from "@/src/store/updateEntity";
 
 enablePatches();
+
 function drain(gen: Generator<void>): void {
   while (!gen.next().done) {}
 }
@@ -17,7 +18,7 @@ async function test() {
   await store.dispatch(productApi.endpoints.getIssues.initiate({}));
   await store.dispatch(productApi.endpoints.getPullRequests.initiate({}));
   await store.dispatch(productApi.endpoints.getTeams.initiate());
-  // const results: any[] = [];
+
   const start = Date.now();
   await store.dispatch(
     updateEntity("User", "user-0271", (draft) => {
@@ -38,11 +39,6 @@ async function test() {
       100,
     ),
   );
-
-
-
-  // console.log(results);
-
 }
 
 test();
