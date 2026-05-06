@@ -4,6 +4,7 @@ import * as prettier from "prettier";
 import { loadFile } from "./loadFile";
 import { collectEntityTypes, EntityInfo, findIdField } from "./collectEntityTypes";
 import { findQueries } from "./findQueries";
+import { findMutations } from "./findMutations";
 import { isEntityType } from "./isEntityType";
 import { getArrayElementType } from "./getArrayElementType";
 
@@ -93,6 +94,7 @@ async function writeUnifiedFile(
   const { checker, sourceFile } = loadFile(apiFilePath);
 
   const queryShapes = new Map<string, ShapeValue>();
+  const mutationShapes = new Map<string, ShapeValue>();
   const allEntities = new Map<string, EntityInfo>();
 
   findQueries(sourceFile, (typeNode, queryName) => {
@@ -102,6 +104,16 @@ async function writeUnifiedFile(
 
     const shape = describeShape(checker, responseType);
     if (shape !== null) queryShapes.set(queryName, shape);
+    for (const [name, info] of entities) allEntities.set(name, info);
+  });
+
+  findMutations(sourceFile, (typeNode, mutationName) => {
+    const responseType = checker.getTypeFromTypeNode(typeNode);
+    const entities = new Map<string, EntityInfo>();
+    collectEntityTypes(checker, responseType, entities, new Set());
+
+    const shape = describeShape(checker, responseType);
+    if (shape !== null) mutationShapes.set(mutationName, shape);
     for (const [name, info] of entities) allEntities.set(name, info);
   });
 
@@ -136,6 +148,12 @@ async function writeUnifiedFile(
     queryMapLines.push(`  ${entityName}: { ${fieldStr} },`);
   }
 
+  // mutationsMap
+  const mutationsMapLines: string[] = [];
+  for (const [name, shape] of mutationShapes) {
+    mutationsMapLines.push(`  ${name}: ${serializeShape(shape)},`);
+  }
+
   // entityIdFields
   const idFieldLines: string[] = [];
   for (const [entityName, info] of allEntities) {
@@ -158,6 +176,8 @@ async function writeUnifiedFile(
   const content =
     `export const queryMap = {\n${queryMapLines.join("\n")}\n} as const;\n\n` +
     `export type QueryMap = typeof queryMap;\n\n` +
+    `export const mutationsMap = {\n${mutationsMapLines.join("\n")}\n} as const;\n\n` +
+    `export type MutationsMap = typeof mutationsMap;\n\n` +
     `export const entityIdFields = {\n${idFieldLines.join("\n")}\n} as const;\n\n` +
     `export type EntityIdFields = typeof entityIdFields;\n\n` +
     `export const entityQueries: Record<string, string[]> = {\n${entityQueriesLines.join("\n")}\n};\n`;
