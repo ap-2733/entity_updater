@@ -24,6 +24,16 @@ const injectedRtkApi = api.injectEndpoints({
     getUsersById: build.query<GetUsersByIdApiResponse, GetUsersByIdApiArg>({
       query: (queryArg) => ({ url: `/users/${queryArg.id}` }),
     }),
+    patchUsersById: build.mutation<
+      PatchUsersByIdApiResponse,
+      PatchUsersByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/users/${queryArg.id}`,
+        method: "PATCH",
+        body: queryArg.body,
+      }),
+    }),
     getUsersByIdRepositories: build.query<
       GetUsersByIdRepositoriesApiResponse,
       GetUsersByIdRepositoriesApiArg
@@ -87,6 +97,16 @@ const injectedRtkApi = api.injectEndpoints({
       GetRepositoriesByIdApiArg
     >({
       query: (queryArg) => ({ url: `/repositories/${queryArg.id}` }),
+    }),
+    patchRepositoriesById: build.mutation<
+      PatchRepositoriesByIdApiResponse,
+      PatchRepositoriesByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/repositories/${queryArg.id}`,
+        method: "PATCH",
+        body: queryArg.body,
+      }),
     }),
     getRepositoriesByIdStargazers: build.query<
       GetRepositoriesByIdStargazersApiResponse,
@@ -153,6 +173,26 @@ const injectedRtkApi = api.injectEndpoints({
     getIssuesById: build.query<GetIssuesByIdApiResponse, GetIssuesByIdApiArg>({
       query: (queryArg) => ({ url: `/issues/${queryArg.id}` }),
     }),
+    putIssuesById: build.mutation<
+      PutIssuesByIdApiResponse,
+      PutIssuesByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/issues/${queryArg.id}`,
+        method: "PUT",
+        body: queryArg.issue,
+      }),
+    }),
+    patchIssuesById: build.mutation<
+      PatchIssuesByIdApiResponse,
+      PatchIssuesByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/issues/${queryArg.id}`,
+        method: "PATCH",
+        body: queryArg.body,
+      }),
+    }),
     getPullRequests: build.query<
       GetPullRequestsApiResponse,
       GetPullRequestsApiArg
@@ -170,6 +210,26 @@ const injectedRtkApi = api.injectEndpoints({
       GetPullRequestsByIdApiArg
     >({
       query: (queryArg) => ({ url: `/pullRequests/${queryArg.id}` }),
+    }),
+    putPullRequestsById: build.mutation<
+      PutPullRequestsByIdApiResponse,
+      PutPullRequestsByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/pullRequests/${queryArg.id}`,
+        method: "PUT",
+        body: queryArg.pullRequest,
+      }),
+    }),
+    patchPullRequestsById: build.mutation<
+      PatchPullRequestsByIdApiResponse,
+      PatchPullRequestsByIdApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/pullRequests/${queryArg.id}`,
+        method: "PATCH",
+        body: queryArg.body,
+      }),
     }),
     getPullRequestsByIdReviews: build.query<
       GetPullRequestsByIdReviewsApiResponse,
@@ -236,6 +296,17 @@ export type GetUsersByIdApiResponse = /** status 200 User with social graph */ {
 export type GetUsersByIdApiArg = {
   id: string;
 };
+export type PatchUsersByIdApiResponse = /** status 200 Updated user */ User;
+export type PatchUsersByIdApiArg = {
+  id: string;
+  body: {
+    username?: string;
+    email?: string;
+    displayName?: string;
+    bio?: string;
+    avatar?: string;
+  };
+};
 export type GetUsersByIdRepositoriesApiResponse =
   /** status 200 User repositories */ Repository[];
 export type GetUsersByIdRepositoriesApiArg = {
@@ -277,6 +348,17 @@ export type GetRepositoriesByIdApiResponse =
   };
 export type GetRepositoriesByIdApiArg = {
   id: string;
+};
+export type PatchRepositoriesByIdApiResponse =
+  /** status 200 Updated repository */ Repository;
+export type PatchRepositoriesByIdApiArg = {
+  id: string;
+  body: {
+    name?: string;
+    description?: string;
+    isPrivate?: boolean;
+    language?: string;
+  };
 };
 export type GetRepositoriesByIdStargazersApiResponse =
   /** status 200 Stargazers */ User[];
@@ -323,6 +405,20 @@ export type GetIssuesByIdApiResponse =
 export type GetIssuesByIdApiArg = {
   id: string;
 };
+export type PutIssuesByIdApiResponse = /** status 200 Replaced issue */ Issue;
+export type PutIssuesByIdApiArg = {
+  id: string;
+  issue: Issue;
+};
+export type PatchIssuesByIdApiResponse = /** status 200 Updated issue */ Issue;
+export type PatchIssuesByIdApiArg = {
+  id: string;
+  body: {
+    title?: string;
+    body?: string;
+    state?: "open" | "closed";
+  };
+};
 export type GetPullRequestsApiResponse =
   /** status 200 List of pull requests */ PullRequest[];
 export type GetPullRequestsApiArg = {
@@ -337,6 +433,22 @@ export type GetPullRequestsByIdApiResponse =
   };
 export type GetPullRequestsByIdApiArg = {
   id: string;
+};
+export type PutPullRequestsByIdApiResponse =
+  /** status 200 Replaced pull request */ PullRequest;
+export type PutPullRequestsByIdApiArg = {
+  id: string;
+  pullRequest: PullRequest;
+};
+export type PatchPullRequestsByIdApiResponse =
+  /** status 200 Updated pull request */ PullRequest;
+export type PatchPullRequestsByIdApiArg = {
+  id: string;
+  body: {
+    title?: string;
+    body?: string;
+    state?: "open" | "closed" | "merged";
+  };
 };
 export type GetPullRequestsByIdReviewsApiResponse =
   /** status 200 Review threads */ ReviewThread[];
@@ -492,6 +604,7 @@ export const {
   useGetUsersQuery,
   useGetUsersSearchQuery,
   useGetUsersByIdQuery,
+  usePatchUsersByIdMutation,
   useGetUsersByIdRepositoriesQuery,
   useGetUsersByIdTeamsQuery,
   useGetUsersByIdIssuesQuery,
@@ -499,6 +612,7 @@ export const {
   useGetRepositoriesQuery,
   useGetRepositoriesSearchQuery,
   useGetRepositoriesByIdQuery,
+  usePatchRepositoriesByIdMutation,
   useGetRepositoriesByIdStargazersQuery,
   useGetRepositoriesByIdIssuesQuery,
   useGetRepositoriesByIdPullRequestsQuery,
@@ -506,8 +620,12 @@ export const {
   useGetIssuesQuery,
   useGetIssuesSearchQuery,
   useGetIssuesByIdQuery,
+  usePutIssuesByIdMutation,
+  usePatchIssuesByIdMutation,
   useGetPullRequestsQuery,
   useGetPullRequestsByIdQuery,
+  usePutPullRequestsByIdMutation,
+  usePatchPullRequestsByIdMutation,
   useGetPullRequestsByIdReviewsQuery,
   useGetTeamsQuery,
   useGetTeamsByIdQuery,

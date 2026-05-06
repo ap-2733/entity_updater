@@ -2,9 +2,9 @@
 import { productApi } from "@/src/store/productApi";
 import { store } from "@/src/store/store";
 import { findEntity } from "@/src/store/findEntity";
-import { get } from "@/src/store/get";
 import { enablePatches } from "immer";
 import { updateEntity } from "@/src/store/updateEntity";
+import { get } from "@/src/store/utils";
 
 enablePatches();
 

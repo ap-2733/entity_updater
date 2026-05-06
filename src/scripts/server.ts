@@ -9,6 +9,7 @@ app.use(express.json());
 app.use((_req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   next();
 });
 
@@ -44,6 +45,13 @@ app.get("/api/users/:id", (req: Request, res: Response) => {
   const user = db.users.find((u: any) => u._id === req.params.id);
   if (!user) return res.status(404).json({ error: "Not found" });
   res.json({ user, followers: user.followers ?? [], following: user.following ?? [] });
+});
+
+app.patch("/api/users/:id", (req: Request, res: Response) => {
+  const idx = db.users.findIndex((u: any) => u._id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Not found" });
+  db.users[idx] = { ...db.users[idx], ...req.body, _id: db.users[idx]._id };
+  res.json(db.users[idx]);
 });
 
 app.get("/api/users/:id/repositories", (req: Request, res: Response) => {
@@ -107,6 +115,13 @@ app.get("/api/repositories/:id", (req: Request, res: Response) => {
   });
 });
 
+app.patch("/api/repositories/:id", (req: Request, res: Response) => {
+  const idx = db.repositories.findIndex((r: any) => r._id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Not found" });
+  db.repositories[idx] = { ...db.repositories[idx], ...req.body, _id: db.repositories[idx]._id };
+  res.json(db.repositories[idx]);
+});
+
 app.get("/api/repositories/:id/stargazers", (req: Request, res: Response) => {
   const repo = db.repositories.find((r: any) => r._id === req.params.id);
   if (!repo) return res.status(404).json({ error: "Not found" });
@@ -168,6 +183,20 @@ app.get("/api/issues/:id", (req: Request, res: Response) => {
   });
 });
 
+app.put("/api/issues/:id", (req: Request, res: Response) => {
+  const idx = db.issues.findIndex((i: any) => i._id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Not found" });
+  db.issues[idx] = { ...req.body, _id: db.issues[idx]._id };
+  res.json(db.issues[idx]);
+});
+
+app.patch("/api/issues/:id", (req: Request, res: Response) => {
+  const idx = db.issues.findIndex((i: any) => i._id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Not found" });
+  db.issues[idx] = { ...db.issues[idx], ...req.body, _id: db.issues[idx]._id };
+  res.json(db.issues[idx]);
+});
+
 app.post("/api/issues/:id/comments", (req: Request, res: Response) => {
   const issue = db.issues.find((i: any) => i._id === req.params.id);
   if (!issue) return res.status(404).json({ error: "Not found" });
@@ -196,6 +225,20 @@ app.get("/api/pullRequests/:id/reviews", (req: Request, res: Response) => {
   res.json(
     db.reviewThreads.filter((rt: any) => rt.pullRequest?._id === req.params.id),
   );
+});
+
+app.put("/api/pullRequests/:id", (req: Request, res: Response) => {
+  const idx = db.pullRequests.findIndex((p: any) => p._id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Not found" });
+  db.pullRequests[idx] = { ...req.body, _id: db.pullRequests[idx]._id };
+  res.json(db.pullRequests[idx]);
+});
+
+app.patch("/api/pullRequests/:id", (req: Request, res: Response) => {
+  const idx = db.pullRequests.findIndex((p: any) => p._id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Not found" });
+  db.pullRequests[idx] = { ...db.pullRequests[idx], ...req.body, _id: db.pullRequests[idx]._id };
+  res.json(db.pullRequests[idx]);
 });
 
 app.post("/api/pullRequests/:id/comments", (req: Request, res: Response) => {

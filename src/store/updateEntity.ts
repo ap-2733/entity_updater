@@ -2,9 +2,8 @@
 import { findEntity } from "@/src/store/findEntity";
 import { Draft, produce, produceWithPatches } from "immer";
 import { AppDispatch, RootState } from "@/src/store/store";
-import { get } from "@/src/store/get";
-import { set } from "@/src/store/set";
 import { promisifyGenerator } from "@/src/store/promisifyGenerator";
+import { get, set } from "@/src/store/utils";
 
 export function updateEntity(
   entityType: Parameters<typeof findEntity>[0],

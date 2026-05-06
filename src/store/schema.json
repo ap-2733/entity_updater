@@ -70,6 +70,40 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "patchUsersById",
+        "summary": "Partially update a user profile",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "displayName": { "type": "string" },
+                  "bio": { "type": "string" },
+                  "avatar": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        }
       }
     },
     "/users/{id}/repositories": {
@@ -224,6 +258,39 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchRepositoriesById",
+        "summary": "Partially update a repository",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "isPrivate": { "type": "boolean" },
+                  "language": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated repository",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Repository" }
               }
             }
           }
@@ -389,6 +456,63 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "putIssuesById",
+        "summary": "Replace an issue",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Issue" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Replaced issue",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Issue" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchIssuesById",
+        "summary": "Partially update an issue",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "body": { "type": "string" },
+                  "state": { "type": "string", "enum": ["open", "closed"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated issue",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Issue" }
+              }
+            }
+          }
+        }
       }
     },
     "/pullRequests": {
@@ -437,6 +561,63 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putPullRequestsById",
+        "summary": "Replace a pull request",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PullRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Replaced pull request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PullRequest" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchPullRequestsById",
+        "summary": "Partially update a pull request",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "body": { "type": "string" },
+                  "state": { "type": "string", "enum": ["open", "closed", "merged"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated pull request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PullRequest" }
               }
             }
           }
