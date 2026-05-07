@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { productApi } from "@/src/store/productApi";
-import { mutationListenerMiddleware } from "@/src/store/generated/mutationListeners";
+import { mutationListenerMiddleware } from "@/src/scripts/utils/mutationListeners";
 
 import { useDispatch, useSelector } from "react-redux";
 

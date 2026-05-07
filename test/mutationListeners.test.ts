@@ -2,7 +2,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { enablePatches } from "immer";
 import { productApi } from "../src/store/productApi";
-import { mutationListenerMiddleware } from "@/src/store/generated/mutationListeners";
+import { mutationListenerMiddleware } from "@/src/scripts/utils/mutationListeners";
 import { user1, user3, repo1, issue1, pr1 } from "./mockData";
 
 enablePatches();

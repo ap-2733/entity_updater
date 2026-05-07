@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { applyPatches, enablePatches } from "immer";
-import { deleteEntity } from "../src/store/generated/deleteEntity";
+import { deleteEntity } from "../src/scripts/utils/deleteEntity";
 import { RootState } from "../src/store/store";
 import { user1, user2, user3, repo1, repo2 } from "./mockData";
 

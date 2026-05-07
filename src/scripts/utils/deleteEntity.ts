@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { findEntity } from "@/src/store/generated/findEntity";
-import { Draft, produce, produceWithPatches } from "immer";
+import { findEntity } from "@/src/scripts/utils/findEntity";
+import { produceWithPatches } from "immer";
 import { AppDispatch, RootState } from "@/src/store/store";
-import { get, promisifyGenerator, set } from "@/src/store/generated/utils";
+import { promisifyGenerator, remove } from "@/src/scripts/utils/utils";
 
-export function updateEntity(
+export function deleteEntity(
   entityType: Parameters<typeof findEntity>[0],
   id: string | number,
-  updater: (entity: Draft<any>) => void,
 ) {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     await promisifyGenerator(
@@ -19,12 +18,10 @@ export function updateEntity(
           const data = (getState().api.queries as any)[queryKey][
             "data"
           ] as object;
-          const entity = get(data, keypath);
-          const updatedEntity = produce(entity, updater);
           const [, patches, invertedPatches] = produceWithPatches(
             data,
             (draft) => {
-              set(draft, keypath, updatedEntity);
+              remove(draft, keypath);
             },
           );
           dispatch({
