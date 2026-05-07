@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { productApi } from "@/src/store/productApi";
-import { mutationListenerMiddleware } from "@/src/store/mutationListeners";
+import { mutationListenerMiddleware } from "@/src/store/generated/mutationListeners";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -21,4 +21,3 @@ export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 export const useAppSelector = useSelector.withTypes<RootState>();
-

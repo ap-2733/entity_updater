@@ -1,5 +1,4 @@
-import { findEntity } from "../src/store/findEntity";
-import { promisifyGenerator } from "../src/store/promisifyGenerator";
+import { findEntity } from "../src/store/generated/findEntity";
 import {
   user1,
   user2,
@@ -15,10 +14,16 @@ import {
   reviewThread2,
 } from "./mockData";
 
+import { promisifyGenerator } from "@/src/store/generated/utils";
+
 beforeEach(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).requestIdleCallback = (cb: (d: { timeRemaining: () => number; didTimeout: boolean }) => void) => {
-    Promise.resolve().then(() => cb({ timeRemaining: () => Infinity, didTimeout: false }));
+  (global as any).requestIdleCallback = (
+    cb: (d: { timeRemaining: () => number; didTimeout: boolean }) => void,
+  ) => {
+    Promise.resolve().then(() =>
+      cb({ timeRemaining: () => Infinity, didTimeout: false }),
+    );
     return 0;
   };
 });
@@ -30,12 +35,17 @@ describe("findEntity", () => {
       const queries = {
         [cacheKey]: { endpointName: "getUsers", data: [user1, user3] },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [0] }]);
@@ -48,7 +58,9 @@ describe("findEntity", () => {
       };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("User", user1._id, queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("User", user1._id, queries, callback, Infinity),
+      );
 
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith(cacheKey, [0]);
@@ -59,12 +71,17 @@ describe("findEntity", () => {
       const queries = {
         [cacheKey]: { endpointName: "getUsersSearch", data: [user3] },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("User", user3._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "User",
+          user3._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [0] }]);
@@ -78,13 +95,16 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (_key, kp) => keyPaths.push(kp),
+          Infinity,
+        ),
       );
 
-      expect(keyPaths).toEqual([
-        [0],
-        [1, "followers", 0],
-      ]);
+      expect(keyPaths).toEqual([[0], [1, "followers", 0]]);
     });
 
     it("finds a user that only appears via followers", async () => {
@@ -95,7 +115,13 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (_key, kp) => keyPaths.push(kp),
+          Infinity,
+        ),
       );
 
       expect(keyPaths).toEqual([[0, "followers", 0]]);
@@ -111,12 +137,17 @@ describe("findEntity", () => {
           data: { user: user1, followers: [], following: [] },
         },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["user"] }]);
@@ -132,7 +163,9 @@ describe("findEntity", () => {
       };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("User", "nonexistent-id", queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("User", "nonexistent-id", queries, callback, Infinity),
+      );
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -145,15 +178,22 @@ describe("findEntity", () => {
           data: { user: user3, followers: [user1], following: [] },
         },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
-      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["followers", 0] }]);
+      expect(results).toEqual([
+        { queryCacheKey: cacheKey, keyPath: ["followers", 0] },
+      ]);
     });
   });
 
@@ -163,12 +203,17 @@ describe("findEntity", () => {
       const queries = {
         [cacheKey]: { endpointName: "getRepositories", data: [repo1, repo3] },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("Repository", repo1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "Repository",
+          repo1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [0] }]);
@@ -182,7 +227,13 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity("Repository", repo1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity),
+        findEntity(
+          "Repository",
+          repo1._id,
+          queries,
+          (_key, kp) => keyPaths.push(kp),
+          Infinity,
+        ),
       );
 
       expect(keyPaths).toEqual([[0, "parentFork"]]);
@@ -198,15 +249,22 @@ describe("findEntity", () => {
           data: { repository: repo1, collaborators: [], forks: [] },
         },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("Repository", repo1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "Repository",
+          repo1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
-      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["repository"] }]);
+      expect(results).toEqual([
+        { queryCacheKey: cacheKey, keyPath: ["repository"] },
+      ]);
     });
 
     it("finds a fork at ['forks', index]", async () => {
@@ -220,7 +278,13 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity("Repository", repo1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity),
+        findEntity(
+          "Repository",
+          repo1._id,
+          queries,
+          (_key, kp) => keyPaths.push(kp),
+          Infinity,
+        ),
       );
 
       expect(keyPaths).toEqual([["forks", 0]]);
@@ -236,12 +300,17 @@ describe("findEntity", () => {
           data: [reviewThread1, reviewThread2],
         },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("ReviewThread", reviewThread2._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "ReviewThread",
+          reviewThread2._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: [1] }]);
@@ -257,7 +326,9 @@ describe("findEntity", () => {
       };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("Issue", issue1._id, queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("Issue", issue1._id, queries, callback, Infinity),
+      );
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -269,18 +340,29 @@ describe("findEntity", () => {
       const queries = {
         [cacheKey]: {
           endpointName: "getIssuesById",
-          data: { issue: issue1, comments: [comment1, comment2], linkedPullRequests: [] },
+          data: {
+            issue: issue1,
+            comments: [comment1, comment2],
+            linkedPullRequests: [],
+          },
         },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("Comment", comment2._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "Comment",
+          comment2._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
-      expect(results).toEqual([{ queryCacheKey: cacheKey, keyPath: ["comments", 1] }]);
+      expect(results).toEqual([
+        { queryCacheKey: cacheKey, keyPath: ["comments", 1] },
+      ]);
     });
 
     it("finds a comment nested in replies", async () => {
@@ -288,13 +370,23 @@ describe("findEntity", () => {
       const queries = {
         [cacheKey]: {
           endpointName: "getIssuesById",
-          data: { issue: issue1, comments: [commentWithReply], linkedPullRequests: [] },
+          data: {
+            issue: issue1,
+            comments: [commentWithReply],
+            linkedPullRequests: [],
+          },
         },
       };
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity("Comment", comment1._id, queries, (_key, kp) => keyPaths.push(kp), Infinity),
+        findEntity(
+          "Comment",
+          comment1._id,
+          queries,
+          (_key, kp) => keyPaths.push(kp),
+          Infinity,
+        ),
       );
 
       expect(keyPaths).toEqual([["comments", 0, "replies", 0]]);
@@ -309,12 +401,17 @@ describe("findEntity", () => {
         [key1]: { endpointName: "getUsers", data: [user1] },
         [key2]: { endpointName: "getUsersSearch", data: [user1] },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([
@@ -333,12 +430,17 @@ describe("findEntity", () => {
           data: { user: user1, followers: [], following: [] },
         },
       };
-      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] = [];
+      const results: { queryCacheKey: string; keyPath: (string | number)[] }[] =
+        [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (queryCacheKey, keyPath) =>
-          results.push({ queryCacheKey, keyPath }),
-        Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
+          Infinity,
+        ),
       );
 
       expect(results).toEqual([
@@ -353,7 +455,9 @@ describe("findEntity", () => {
       const queries = { key: { endpointName: "getUsers", data: null } };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("User", user1._id, queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("User", user1._id, queries, callback, Infinity),
+      );
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -362,7 +466,9 @@ describe("findEntity", () => {
       const queries = { key: { endpointName: "getUsers", data: [] } };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("User", user1._id, queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("User", user1._id, queries, callback, Infinity),
+      );
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -373,7 +479,9 @@ describe("findEntity", () => {
       };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("User", user1._id, queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("User", user1._id, queries, callback, Infinity),
+      );
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -388,7 +496,9 @@ describe("findEntity", () => {
       };
       const callback = jest.fn();
 
-      await promisifyGenerator(findEntity("Issue", issue1._id, queries, callback, Infinity));
+      await promisifyGenerator(
+        findEntity("Issue", issue1._id, queries, callback, Infinity),
+      );
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -400,14 +510,21 @@ describe("findEntity", () => {
       const found: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (_key, kp) => found.push(kp), Infinity),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (_key, kp) => found.push(kp),
+          Infinity,
+        ),
       );
 
       expect(found).toEqual([[0]]);
     });
 
     it("resolves when the generator yields due to an exceeded deadline", async () => {
-      const spy = jest.spyOn(performance, "now")
+      const spy = jest
+        .spyOn(performance, "now")
         .mockReturnValueOnce(0)
         .mockReturnValue(100);
 
@@ -419,14 +536,17 @@ describe("findEntity", () => {
       );
 
       await expect(
-        promisifyGenerator(findEntity("User", user1._id, queries, jest.fn(), 1)),
+        promisifyGenerator(
+          findEntity("User", user1._id, queries, jest.fn(), 1),
+        ),
       ).resolves.toBeUndefined();
 
       spy.mockRestore();
     });
 
     it("finds the entity after resuming from a yield", async () => {
-      const spy = jest.spyOn(performance, "now")
+      const spy = jest
+        .spyOn(performance, "now")
         .mockReturnValueOnce(0)
         .mockReturnValueOnce(100)
         .mockReturnValue(0);
@@ -440,7 +560,13 @@ describe("findEntity", () => {
       const found: string[] = [];
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, (_key, kp) => found.push(String(kp[0])), 1),
+        findEntity(
+          "User",
+          user1._id,
+          queries,
+          (_key, kp) => found.push(String(kp[0])),
+          1,
+        ),
       );
 
       expect(found).toEqual(["0"]);

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { applyPatches, enablePatches } from "immer";
-import { deleteEntity } from "../src/store/deleteEntity";
+import { deleteEntity } from "../src/store/generated/deleteEntity";
 import { RootState } from "../src/store/store";
 import { user1, user2, user3, repo1, repo2 } from "./mockData";
 
@@ -114,7 +114,11 @@ describe("deleteEntity", () => {
     });
 
     it("patches nullify a property reference", async () => {
-      const data = { repository: { ...repo2, parentFork: { ...repo1 } }, collaborators: [], forks: [] };
+      const data = {
+        repository: { ...repo2, parentFork: { ...repo1 } },
+        collaborators: [],
+        forks: [],
+      };
       const { dispatch, getState } = makeMockStore({
         'getRepositoriesById({"id":"r2"})': {
           endpointName: "getRepositoriesById",
@@ -130,7 +134,11 @@ describe("deleteEntity", () => {
     });
 
     it("invertedPatches restore a nullified property reference", async () => {
-      const data = { repository: { ...repo2, parentFork: { ...repo1 } }, collaborators: [], forks: [] };
+      const data = {
+        repository: { ...repo2, parentFork: { ...repo1 } },
+        collaborators: [],
+        forks: [],
+      };
       const { dispatch, getState } = makeMockStore({
         'getRepositoriesById({"id":"r2"})': {
           endpointName: "getRepositoriesById",

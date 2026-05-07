@@ -2,7 +2,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { enablePatches } from "immer";
 import { productApi } from "../src/store/productApi";
-import { mutationListenerMiddleware } from "../src/store/mutationListeners";
+import { mutationListenerMiddleware } from "@/src/store/generated/mutationListeners";
 import { user1, user3, repo1, issue1, pr1 } from "./mockData";
 
 enablePatches();
@@ -118,7 +118,7 @@ describe("mutationListeners", () => {
         username: "alice-updated",
       });
 
-      const data = findQueryData<typeof user1[]>(store, "getUsers");
+      const data = findQueryData<(typeof user1)[]>(store, "getUsers");
       expect(data[0].username).toBe("alice-updated");
     });
 
@@ -135,7 +135,7 @@ describe("mutationListeners", () => {
         username: "alice-updated",
       });
 
-      const data = findQueryData<typeof user1[]>(store, "getUsers");
+      const data = findQueryData<(typeof user1)[]>(store, "getUsers");
       expect(data.find((u) => u._id === user3._id)?.username).toBe(
         user3.username,
       );
@@ -155,8 +155,11 @@ describe("mutationListeners", () => {
         username: "alice-updated",
       });
 
-      const listData = findQueryData<typeof user1[]>(store, "getUsers");
-      const searchData = findQueryData<typeof user1[]>(store, "getUsersSearch");
+      const listData = findQueryData<(typeof user1)[]>(store, "getUsers");
+      const searchData = findQueryData<(typeof user1)[]>(
+        store,
+        "getUsersSearch",
+      );
       expect(listData[0].username).toBe("alice-updated");
       expect(searchData[0].username).toBe("alice-updated");
     });
@@ -186,7 +189,7 @@ describe("mutationListeners", () => {
         name: "renamed-project",
       });
 
-      const data = findQueryData<typeof repo1[]>(store, "getRepositories");
+      const data = findQueryData<(typeof repo1)[]>(store, "getRepositories");
       expect(data[0].name).toBe("renamed-project");
     });
   });
@@ -203,7 +206,7 @@ describe("mutationListeners", () => {
         state: "closed",
       });
 
-      const data = findQueryData<typeof issue1[]>(store, "getIssues");
+      const data = findQueryData<(typeof issue1)[]>(store, "getIssues");
       expect(data[0].title).toBe("Fixed login bug");
       expect(data[0].state).toBe("closed");
     });
@@ -220,7 +223,7 @@ describe("mutationListeners", () => {
         state: "closed",
       });
 
-      const data = findQueryData<typeof issue1[]>(store, "getIssues");
+      const data = findQueryData<(typeof issue1)[]>(store, "getIssues");
       expect(data[0].state).toBe("closed");
     });
   });
@@ -240,7 +243,7 @@ describe("mutationListeners", () => {
         state: "merged",
       });
 
-      const data = findQueryData<typeof pr1[]>(store, "getPullRequests");
+      const data = findQueryData<(typeof pr1)[]>(store, "getPullRequests");
       expect(data[0].title).toBe("Updated PR");
       expect(data[0].state).toBe("merged");
     });
@@ -260,7 +263,7 @@ describe("mutationListeners", () => {
         state: "merged",
       });
 
-      const data = findQueryData<typeof pr1[]>(store, "getPullRequests");
+      const data = findQueryData<(typeof pr1)[]>(store, "getPullRequests");
       expect(data[0].state).toBe("merged");
     });
   });

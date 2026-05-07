@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { productApi } from "@/src/store/productApi";
 import { store } from "@/src/store/store";
-import { findEntity } from "@/src/store/findEntity";
+import { findEntity } from "@/src/store/generated/findEntity";
 import { enablePatches } from "immer";
-import { updateEntity } from "@/src/store/updateEntity";
-import { get } from "@/src/store/utils";
+import { updateEntity } from "@/src/store/generated/updateEntity";
+import { get } from "@/src/store/generated/utils";
 
 enablePatches();
 

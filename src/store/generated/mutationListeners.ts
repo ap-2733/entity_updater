@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createListenerMiddleware } from "@reduxjs/toolkit";
-import { productApi } from "./productApi";
-import { entityIdFields, mutationsMap } from "./apiMap";
+import { productApi } from "../productApi";
+import { entityIdFields, mutationsMap } from "@/src/store/generated/apiMap";
 import { updateEntity } from "./updateEntity";
-import type { AppDispatch } from "./store";
+import type { AppDispatch } from "../store";
 
 export const mutationListenerMiddleware = createListenerMiddleware();
 

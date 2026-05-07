@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { findEntity } from "@/src/store/findEntity";
+import { findEntity } from "@/src/store/generated/findEntity";
 import { Draft, produce, produceWithPatches } from "immer";
 import { AppDispatch, RootState } from "@/src/store/store";
-import { promisifyGenerator } from "@/src/store/promisifyGenerator";
-import { get, set } from "@/src/store/utils";
+import { get, promisifyGenerator, set } from "@/src/store/generated/utils";
 
 export function updateEntity(
   entityType: Parameters<typeof findEntity>[0],

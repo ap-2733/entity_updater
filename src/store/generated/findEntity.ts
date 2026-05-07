@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { queryMap, entityIdFields, entityQueries, EntityIdFields } from "./apiMap";
+import {
+  queryMap,
+  entityIdFields,
+  entityQueries,
+  EntityIdFields,
+} from "@/src/store/generated/apiMap";
 
 type EntityTypeName = keyof EntityIdFields;
 

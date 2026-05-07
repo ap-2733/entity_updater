@@ -43,3 +43,43 @@ export function set<T>(root: T, path: (string | number)[], value: unknown): T {
   node[path[path.length - 1]] = value;
   return root;
 }
+
+type IdleGenerator<T> = Generator<void, T, number>;
+
+interface PromisifyGeneratorOptions {
+  timeout?: number;
+}
+
+/**
+ * Runs a generator incrementally using requestIdleCallback until completion.
+ */
+export function promisifyGenerator(
+  generator: IdleGenerator<void>,
+  options?: PromisifyGeneratorOptions,
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    function run(deadline: IdleDeadline): void {
+      try {
+        let timeRemaining = deadline.timeRemaining();
+        while (timeRemaining > 0 || deadline.didTimeout) {
+          const result = generator.next(timeRemaining);
+
+          if (result.done) {
+            resolve();
+            return;
+          }
+          timeRemaining = deadline.timeRemaining();
+        }
+        requestIdleCallback(run, {
+          timeout: options?.timeout,
+        });
+      } catch (error) {
+        reject(error);
+      }
+    }
+
+    requestIdleCallback(run, {
+      timeout: options?.timeout,
+    });
+  });
+}

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { applyPatches, enablePatches } from "immer";
-import { updateEntity } from "../src/store/updateEntity";
-import { RootState } from "../src/store/store";
+import { updateEntity } from "@/src/store/generated/updateEntity";
+import { RootState } from "@/src/store/store";
 import { user1, user2, user3 } from "./mockData";
 
 enablePatches();

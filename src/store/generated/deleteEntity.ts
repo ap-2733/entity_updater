@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { findEntity } from "@/src/store/findEntity";
+import { findEntity } from "@/src/store/generated/findEntity";
 import { produceWithPatches } from "immer";
 import { AppDispatch, RootState } from "@/src/store/store";
-import { promisifyGenerator } from "@/src/store/promisifyGenerator";
-import { remove } from "@/src/store/utils";
+import { promisifyGenerator, remove } from "@/src/store/generated/utils";
 
 export function deleteEntity(
   entityType: Parameters<typeof findEntity>[0],
@@ -16,7 +15,9 @@ export function deleteEntity(
         id,
         getState().api.queries as any,
         (queryKey, keypath) => {
-          const data = (getState().api.queries as any)[queryKey]["data"] as object;
+          const data = (getState().api.queries as any)[queryKey][
+            "data"
+          ] as object;
           const [, patches, invertedPatches] = produceWithPatches(
             data,
             (draft) => {

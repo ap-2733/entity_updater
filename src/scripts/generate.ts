@@ -1,9 +1,9 @@
-import { generateTypeSchema } from "./generateTypeSchema";
+import { generateTypeSchema } from "./ts-utils/generateTypeSchema";
 
 async function main() {
   await generateTypeSchema(
     "./src/store/productApi.ts",
-    "./src/store/apiMap.ts",
+    "./src/store/generated/apiMap.ts",
   );
 }
 
