@@ -90,7 +90,7 @@ export const queryMap = {
 
 export type QueryMap = typeof queryMap;
 
-export const mutationsMap = {
+export const mutationsMap: Record<string, string> = {
   patchUsersById: "User",
   patchRepositoriesById: "Repository",
   putIssuesById: "Issue",
@@ -99,9 +99,7 @@ export const mutationsMap = {
   patchPullRequestsById: "PullRequest",
 } as const;
 
-export type MutationsMap = typeof mutationsMap;
-
-export const entityIdFields = {
+export const entityIdFields: Record<string, string> = {
   User: "_id",
   Repository: "_id",
   Team: "_id",

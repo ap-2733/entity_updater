@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { productApi } from "../src/store/productApi";
-import { setupMutationListeners } from "@/src/scripts/content/mutationListeners";
-import { wrapApiReducer } from "@/src/scripts/content/wrapApiReducer";
 import { user1, user3, repo1, issue1, pr1 } from "./mockData";
+import { setupMutationListeners } from "@/src/scripts/content";
+import { wrapApiReducer } from "@/src/scripts/content/utils";
 
 beforeEach(() => {
   (global as any).requestIdleCallback = (
@@ -22,7 +22,7 @@ function makeStore(
   queries: Record<string, { endpointName: string; data: unknown }> = {},
 ) {
   const listenerMiddleware = createListenerMiddleware();
-  setupMutationListeners(listenerMiddleware);
+  setupMutationListeners(listenerMiddleware, productApi);
   return configureStore({
     reducer: { api: wrapApiReducer(productApi.reducer) } as any,
     middleware: (getDefaultMiddleware) =>

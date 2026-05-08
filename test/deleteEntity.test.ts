@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { deleteEntity } from "../src/scripts/content/deleteEntity";
 import { RootState } from "../src/store/store";
 import { user1, user2, user3, repo1, repo2 } from "./mockData";
+import { deleteEntity } from "../src/scripts/content";
 
 beforeEach(() => {
   (global as any).requestIdleCallback = (

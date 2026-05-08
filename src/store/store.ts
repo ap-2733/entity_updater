@@ -3,8 +3,8 @@ import { productApi } from "@/src/store/productApi";
 // import { mutationListenerMiddleware } from "./generated/mutationListeners";
 
 import { useDispatch, useSelector } from "react-redux";
-import { wrapApiReducer } from "@/src/scripts/content/wrapApiReducer";
-import { setupMutationListeners } from "@/src/scripts/content/mutationListeners";
+import { setupMutationListeners } from "@/src/scripts/content";
+import { wrapApiReducer } from "@/src/scripts/content/utils";
 
 const listenerMiddleware = createListenerMiddleware();
 
@@ -18,7 +18,7 @@ export const store = configureStore({
       .concat(productApi.middleware),
 });
 
-setupMutationListeners(listenerMiddleware);
+setupMutationListeners(listenerMiddleware, productApi);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

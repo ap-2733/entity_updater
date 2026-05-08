@@ -1,4 +1,3 @@
-import { findEntity } from "../src/scripts/content/findEntity";
 import {
   user1,
   user2,
@@ -14,7 +13,15 @@ import {
   reviewThread2,
 } from "./mockData";
 
-import { promisifyGenerator } from "@/src/scripts/content/utils";
+import {
+  findEntityGenerator,
+  promisifyGenerator,
+} from "@/src/scripts/content/utils";
+import {
+  entityIdFields,
+  entityQueries,
+  queryMap,
+} from "@/src/scripts/content/apiMap";
 
 beforeEach(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,12 +46,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -59,7 +69,7 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, callback, Infinity),
+        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
       );
 
       expect(callback).toHaveBeenCalledTimes(1);
@@ -75,12 +85,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user3._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -95,12 +108,15 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (_key, kp) => keyPaths.push(kp),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -115,12 +131,15 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (_key, kp) => keyPaths.push(kp),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -141,12 +160,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -164,7 +186,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("User", "nonexistent-id", queries, callback, Infinity),
+        findEntityGenerator(
+          "User",
+          "nonexistent-id",
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -182,12 +213,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -207,12 +241,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "Repository",
           repo1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -227,12 +264,15 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "Repository",
           repo1._id,
           queries,
           (_key, kp) => keyPaths.push(kp),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -253,12 +293,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "Repository",
           repo1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -278,12 +321,15 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "Repository",
           repo1._id,
           queries,
           (_key, kp) => keyPaths.push(kp),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -304,12 +350,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "ReviewThread",
           reviewThread2._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -327,7 +376,7 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("Issue", issue1._id, queries, callback, Infinity),
+        findEntityGenerator("Issue", issue1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -351,12 +400,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "Comment",
           comment2._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -380,12 +432,15 @@ describe("findEntity", () => {
       const keyPaths: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "Comment",
           comment1._id,
           queries,
           (_key, kp) => keyPaths.push(kp),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -405,12 +460,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -434,12 +492,15 @@ describe("findEntity", () => {
         [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (queryCacheKey, keyPath) => results.push({ queryCacheKey, keyPath }),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -456,7 +517,7 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, callback, Infinity),
+        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -467,7 +528,7 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, callback, Infinity),
+        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -480,7 +541,7 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("User", user1._id, queries, callback, Infinity),
+        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -497,7 +558,7 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntity("Issue", issue1._id, queries, callback, Infinity),
+        findEntityGenerator("Issue", issue1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -510,12 +571,15 @@ describe("findEntity", () => {
       const found: (string | number)[][] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (_key, kp) => found.push(kp),
           Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 
@@ -537,7 +601,7 @@ describe("findEntity", () => {
 
       await expect(
         promisifyGenerator(
-          findEntity("User", user1._id, queries, jest.fn(), 1),
+          findEntityGenerator("User", user1._id, queries, jest.fn(), 1, entityIdFields, queryMap, entityQueries),
         ),
       ).resolves.toBeUndefined();
 
@@ -560,12 +624,15 @@ describe("findEntity", () => {
       const found: string[] = [];
 
       await promisifyGenerator(
-        findEntity(
+        findEntityGenerator(
           "User",
           user1._id,
           queries,
           (_key, kp) => found.push(String(kp[0])),
           1,
+          entityIdFields,
+          queryMap,
+          entityQueries,
         ),
       );
 

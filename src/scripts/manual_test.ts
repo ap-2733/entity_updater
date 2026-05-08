@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { productApi } from "@/src/store/productApi";
 import { store } from "@/src/store/store";
-import { findEntity } from "@/src/scripts/content/findEntity";
 import { enablePatches } from "immer";
-import { updateEntity } from "@/src/scripts/content/updateEntity";
-import { get } from "@/src/scripts/content/utils";
+import { findEntityGenerator, get } from "@/src/scripts/content/utils";
+import { updateEntity } from "@/src/scripts/content";
+import {
+  entityIdFields,
+  entityQueries,
+  queryMap,
+} from "@/src/scripts/content/apiMap";
 
 enablePatches();
 
@@ -27,7 +31,7 @@ async function test() {
   );
   console.log(Date.now() - start);
   drain(
-    findEntity(
+    findEntityGenerator(
       "User",
       "user-0271",
       store.getState().api.queries as any,
@@ -37,6 +41,9 @@ async function test() {
         console.log(entity);
       },
       100,
+      entityIdFields,
+      queryMap,
+      entityQueries,
     ),
   );
 }
