@@ -1,18 +1,24 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { productApi } from "@/src/store/productApi";
-import { mutationListenerMiddleware } from "@/src/scripts/utils/mutationListeners";
+// import { mutationListenerMiddleware } from "./generated/mutationListeners";
 
 import { useDispatch, useSelector } from "react-redux";
+import { wrapApiReducer } from "@/src/scripts/content/wrapApiReducer";
+import { setupMutationListeners } from "@/src/scripts/content/mutationListeners";
+
+const listenerMiddleware = createListenerMiddleware();
 
 export const store = configureStore({
   reducer: {
-    [productApi.reducerPath]: productApi.reducer,
+    [productApi.reducerPath]: wrapApiReducer(productApi.reducer),
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
-      .concat(mutationListenerMiddleware.middleware)
+      .concat(listenerMiddleware.middleware)
       .concat(productApi.middleware),
 });
+
+setupMutationListeners(listenerMiddleware);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

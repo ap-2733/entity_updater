@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { configureStore } from "@reduxjs/toolkit";
-import { enablePatches } from "immer";
+import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { productApi } from "../src/store/productApi";
-import { mutationListenerMiddleware } from "@/src/scripts/utils/mutationListeners";
+import { setupMutationListeners } from "@/src/scripts/content/mutationListeners";
+import { wrapApiReducer } from "@/src/scripts/content/wrapApiReducer";
 import { user1, user3, repo1, issue1, pr1 } from "./mockData";
-
-enablePatches();
 
 beforeEach(() => {
   (global as any).requestIdleCallback = (
@@ -23,11 +21,13 @@ beforeEach(() => {
 function makeStore(
   queries: Record<string, { endpointName: string; data: unknown }> = {},
 ) {
+  const listenerMiddleware = createListenerMiddleware();
+  setupMutationListeners(listenerMiddleware);
   return configureStore({
-    reducer: { api: productApi.reducer } as any,
+    reducer: { api: wrapApiReducer(productApi.reducer) } as any,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({ serializableCheck: false }).concat(
-        mutationListenerMiddleware.middleware,
+        listenerMiddleware.middleware,
       ),
     preloadedState: {
       api: {

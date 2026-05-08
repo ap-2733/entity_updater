@@ -4,7 +4,7 @@ import {
   entityIdFields,
   entityQueries,
   EntityIdFields,
-} from "@/src/store/generated/apiMap";
+} from "./apiMap";
 
 type EntityTypeName = keyof EntityIdFields;
 

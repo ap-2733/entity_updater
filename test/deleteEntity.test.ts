@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { applyPatches, enablePatches } from "immer";
-import { deleteEntity } from "../src/scripts/utils/deleteEntity";
+import { deleteEntity } from "../src/scripts/content/deleteEntity";
 import { RootState } from "../src/store/store";
 import { user1, user2, user3, repo1, repo2 } from "./mockData";
-
-enablePatches();
 
 beforeEach(() => {
   (global as any).requestIdleCallback = (
@@ -27,7 +24,7 @@ function makeMockStore(
 
 describe("deleteEntity", () => {
   describe("dispatching", () => {
-    it("dispatches queryResultPatched with the correct queryCacheKey", async () => {
+    it("dispatches queryResultsDeleted with the correct action type", async () => {
       const cacheKey = "getUsers({})";
       const { dispatch, getState } = makeMockStore({
         [cacheKey]: { endpointName: "getUsers", data: [user1, user3] },
@@ -38,8 +35,7 @@ describe("deleteEntity", () => {
       expect(dispatch).toHaveBeenCalledTimes(1);
       expect(dispatch).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "api/queries/queryResultPatched",
-          payload: expect.objectContaining({ queryCacheKey: cacheKey }),
+          type: "api/queries/entitiesDeleted",
         }),
       );
     });
@@ -54,7 +50,7 @@ describe("deleteEntity", () => {
       expect(dispatch).not.toHaveBeenCalled();
     });
 
-    it("dispatches once per cache entry that contains the entity", async () => {
+    it("dispatches once with keyPaths for all cache entries that contain the entity", async () => {
       const key1 = "getUsers({})";
       const key2 = 'getUsersSearch({"q":"alice"})';
       const { dispatch, getState } = makeMockStore({
@@ -64,14 +60,13 @@ describe("deleteEntity", () => {
 
       await deleteEntity("User", user1._id)(dispatch, getState);
 
-      expect(dispatch).toHaveBeenCalledTimes(2);
-      const cacheKeys = dispatch.mock.calls.map(
-        ([action]: [any]) => action.payload.queryCacheKey,
-      );
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      const { keyPaths } = dispatch.mock.calls[0][0].payload;
+      const cacheKeys = keyPaths.map(([key]: (string | number)[]) => key);
       expect(cacheKeys).toEqual(expect.arrayContaining([key1, key2]));
     });
 
-    it("dispatches for each location when entity appears multiple times in a single entry", async () => {
+    it("dispatches once with multiple keyPaths when entity appears multiple times in a single entry", async () => {
       // user1 appears at [0] directly and at [1, 'followers', 0] inside user2
       const { dispatch, getState } = makeMockStore({
         "getUsers({})": { endpointName: "getUsers", data: [user1, user2] },
@@ -79,107 +74,80 @@ describe("deleteEntity", () => {
 
       await deleteEntity("User", user1._id)(dispatch, getState);
 
-      expect(dispatch).toHaveBeenCalledTimes(2);
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      const { keyPaths } = dispatch.mock.calls[0][0].payload;
+      expect(keyPaths).toHaveLength(2);
     });
   });
 
-  describe("patch correctness", () => {
-    it("patches splice the entity out of an array", async () => {
-      const data = [{ ...user1 }, { ...user3 }];
+  describe("payload correctness", () => {
+    it("keyPaths entry for an array element includes queryCacheKey, 'data', and the index", async () => {
+      const cacheKey = "getUsers({})";
       const { dispatch, getState } = makeMockStore({
-        "getUsers({})": { endpointName: "getUsers", data },
+        [cacheKey]: { endpointName: "getUsers", data: [user1, user3] },
       });
 
       await deleteEntity("User", user1._id)(dispatch, getState);
 
-      const { patches } = dispatch.mock.calls[0][0].payload;
-      const result = applyPatches(data, patches) as typeof data;
-      expect(result).toHaveLength(1);
-      expect(result[0]._id).toBe(user3._id);
+      const { keyPaths } = dispatch.mock.calls[0][0].payload;
+      expect(keyPaths).toHaveLength(1);
+      expect(keyPaths[0]).toEqual([cacheKey, "data", 0]);
     });
 
-    it("invertedPatches restore the original array after splicing", async () => {
-      const data = [{ ...user1 }, { ...user3 }];
-      const { dispatch, getState } = makeMockStore({
-        "getUsers({})": { endpointName: "getUsers", data },
-      });
-
-      await deleteEntity("User", user1._id)(dispatch, getState);
-
-      const { patches, invertedPatches } = dispatch.mock.calls[0][0].payload;
-      const patched = applyPatches(data, patches) as typeof data;
-      const restored = applyPatches(patched, invertedPatches) as typeof data;
-      expect(restored).toHaveLength(2);
-      expect(restored[0]._id).toBe(user1._id);
-    });
-
-    it("patches nullify a property reference", async () => {
-      const data = {
-        repository: { ...repo2, parentFork: { ...repo1 } },
-        collaborators: [],
-        forks: [],
-      };
-      const { dispatch, getState } = makeMockStore({
-        'getRepositoriesById({"id":"r2"})': {
-          endpointName: "getRepositoriesById",
-          data,
-        },
-      });
-
-      await deleteEntity("Repository", repo1._id)(dispatch, getState);
-
-      const { patches } = dispatch.mock.calls[0][0].payload;
-      const result = applyPatches(data, patches) as typeof data;
-      expect(result.repository.parentFork).toBeNull();
-    });
-
-    it("invertedPatches restore a nullified property reference", async () => {
-      const data = {
-        repository: { ...repo2, parentFork: { ...repo1 } },
-        collaborators: [],
-        forks: [],
-      };
-      const { dispatch, getState } = makeMockStore({
-        'getRepositoriesById({"id":"r2"})': {
-          endpointName: "getRepositoriesById",
-          data,
-        },
-      });
-
-      await deleteEntity("Repository", repo1._id)(dispatch, getState);
-
-      const { patches, invertedPatches } = dispatch.mock.calls[0][0].payload;
-      const patched = applyPatches(data, patches) as typeof data;
-      const restored = applyPatches(patched, invertedPatches) as typeof data;
-      expect(restored.repository.parentFork?._id).toBe(repo1._id);
-    });
-
-    it("removes a nested entity found via keypath", async () => {
+    it("keyPaths entry for a nested array element includes the full keypath", async () => {
       // user1 only appears nested inside user2's followers, not at the top level
-      const data = [{ ...user2, followers: [{ ...user1 }] }];
+      const cacheKey = "getUsers({})";
       const { dispatch, getState } = makeMockStore({
-        "getUsers({})": { endpointName: "getUsers", data },
+        [cacheKey]: {
+          endpointName: "getUsers",
+          data: [{ ...user2, followers: [{ ...user1 }] }],
+        },
       });
 
       await deleteEntity("User", user1._id)(dispatch, getState);
 
-      expect(dispatch).toHaveBeenCalledTimes(1);
-      const { patches } = dispatch.mock.calls[0][0].payload;
-      const result = applyPatches(data, patches) as typeof data;
-      expect(result[0].followers).toHaveLength(0);
+      const { keyPaths } = dispatch.mock.calls[0][0].payload;
+      expect(keyPaths).toHaveLength(1);
+      expect(keyPaths[0]).toEqual([cacheKey, "data", 0, "followers", 0]);
     });
 
-    it("leaves unrelated entities in the same array unchanged", async () => {
-      const data = [{ ...user1 }, { ...user3 }];
+    it("keyPaths entry for a property reference includes the full keypath to that property", async () => {
+      const cacheKey = 'getRepositoriesById({"id":"r2"})';
       const { dispatch, getState } = makeMockStore({
-        "getUsers({})": { endpointName: "getUsers", data },
+        [cacheKey]: {
+          endpointName: "getRepositoriesById",
+          data: {
+            repository: { ...repo2, parentFork: { ...repo1 } },
+            collaborators: [],
+            forks: [],
+          },
+        },
+      });
+
+      await deleteEntity("Repository", repo1._id)(dispatch, getState);
+
+      const { keyPaths } = dispatch.mock.calls[0][0].payload;
+      expect(keyPaths).toHaveLength(1);
+      expect(keyPaths[0]).toEqual([
+        cacheKey,
+        "data",
+        "repository",
+        "parentFork",
+      ]);
+    });
+
+    it("does not include keyPaths for unrelated entities", async () => {
+      const { dispatch, getState } = makeMockStore({
+        "getUsers({})": { endpointName: "getUsers", data: [user1, user3] },
       });
 
       await deleteEntity("User", user1._id)(dispatch, getState);
 
-      const { patches } = dispatch.mock.calls[0][0].payload;
-      const result = applyPatches(data, patches) as typeof data;
-      expect(result.some((u) => u._id === user3._id)).toBe(true);
+      const { keyPaths } = dispatch.mock.calls[0][0].payload;
+      const allIds = keyPaths.map(
+        (kp: (string | number)[]) => kp[kp.length - 1],
+      );
+      expect(allIds).not.toContain(user3._id);
     });
   });
 });

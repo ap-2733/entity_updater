@@ -1,4 +1,4 @@
-import { findEntity } from "../src/scripts/utils/findEntity";
+import { findEntity } from "../src/scripts/content/findEntity";
 import {
   user1,
   user2,
@@ -14,7 +14,7 @@ import {
   reviewThread2,
 } from "./mockData";
 
-import { promisifyGenerator } from "@/src/scripts/utils/utils";
+import { promisifyGenerator } from "@/src/scripts/content/utils";
 
 beforeEach(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
