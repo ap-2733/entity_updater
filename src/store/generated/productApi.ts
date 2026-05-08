@@ -6,7 +6,7 @@ import {
   updateEntityInternal,
   deleteEntityInternal,
   setupMutationListenersInternal,
-} from "@/src/scripts/content/utils";
+} from "./utils";
 
 export const queryMap = {
   getUsers: "User[]",

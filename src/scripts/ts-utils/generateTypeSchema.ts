@@ -1,5 +1,6 @@
 import ts from "typescript";
 import * as fs from "node:fs";
+import * as path from "node:path";
 import * as prettier from "prettier";
 import { loadFile } from "./loadFile";
 import {
@@ -186,7 +187,7 @@ async function writeUnifiedFile(
     `import { Draft } from "immer";\n` +
     `import { createListenerMiddleware } from "@reduxjs/toolkit";\n` +
     `import { Api } from "@reduxjs/toolkit/query";\n` +
-    `import { updateEntityInternal, deleteEntityInternal, setupMutationListenersInternal } from "@/src/scripts/content/utils";\n\n` +
+    `import { updateEntityInternal, deleteEntityInternal, setupMutationListenersInternal } from "./utils";\n\n` +
     `export const queryMap = {\n${queryMapLines.join("\n")}\n} as const;\n\n` +
     `export type QueryMap = typeof queryMap;\n\n` +
     `export const mutationsMap = {\n${mutationsMapLines.join("\n")}\n} as const;\n\n` +
@@ -215,6 +216,10 @@ async function writeUnifiedFile(
     outputFilePath,
     await prettier.format(content, { filepath: outputFilePath }),
   );
+
+  const outputDir = path.dirname(path.resolve(outputFilePath));
+  const utilsSrc = path.resolve(__dirname, "./utils.ts");
+  fs.copyFileSync(utilsSrc, path.join(outputDir, "utils.ts"));
 }
 
 export async function generateTypeSchema(

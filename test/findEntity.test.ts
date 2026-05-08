@@ -13,10 +13,7 @@ import {
   reviewThread2,
 } from "./mockData";
 
-import {
-  findEntityGenerator,
-  promisifyGenerator,
-} from "@/src/scripts/content/utils";
+import { findEntityGenerator, promisifyGenerator } from "@/src/scripts/utils";
 import {
   entityIdFields,
   entityQueries,

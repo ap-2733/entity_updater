@@ -2,7 +2,7 @@
 import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { productApi } from "../src/store/productApi";
 import { user1, user3, repo1, issue1, pr1 } from "./mockData";
-import { wrapApiReducer } from "@/src/scripts/content/utils";
+import { wrapApiReducer } from "@/src/scripts/utils";
 import { setupMutationListeners } from "@/src/store/generated/productApi";
 
 beforeEach(() => {
