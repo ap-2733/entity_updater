@@ -2,7 +2,11 @@ import ts from "typescript";
 import * as fs from "node:fs";
 import * as prettier from "prettier";
 import { loadFile } from "./loadFile";
-import { collectEntityTypes, EntityInfo, findIdField } from "./collectEntityTypes";
+import {
+  collectEntityTypes,
+  EntityInfo,
+  findIdField,
+} from "./collectEntityTypes";
 import { findQueries } from "./findQueries";
 import { findMutations } from "./findMutations";
 import { isEntityType } from "./isEntityType";
@@ -13,7 +17,9 @@ type ShapeValue = string | Record<string, string>;
 function isDomainEntity(checker: ts.TypeChecker, type: ts.Type): boolean {
   if (!isEntityType(checker, type)) return false;
   const declared = checker.getDeclaredTypeOfSymbol(type.aliasSymbol!);
-  return findIdField(checker, declared, type.aliasSymbol!.getName()) !== undefined;
+  return (
+    findIdField(checker, declared, type.aliasSymbol!.getName()) !== undefined
+  );
 }
 
 function describeShape(
@@ -176,13 +182,34 @@ async function writeUnifiedFile(
   }
 
   const content =
+    `/* eslint-disable @typescript-eslint/no-explicit-any */\n` +
+    `import { Draft } from "immer";\n` +
+    `import { createListenerMiddleware } from "@reduxjs/toolkit";\n` +
+    `import { Api } from "@reduxjs/toolkit/query";\n` +
+    `import { updateEntityInternal, deleteEntityInternal, setupMutationListenersInternal } from "@/src/scripts/content/utils";\n\n` +
     `export const queryMap = {\n${queryMapLines.join("\n")}\n} as const;\n\n` +
     `export type QueryMap = typeof queryMap;\n\n` +
     `export const mutationsMap = {\n${mutationsMapLines.join("\n")}\n} as const;\n\n` +
     `export type MutationsMap = typeof mutationsMap;\n\n` +
     `export const entityIdFields = {\n${idFieldLines.join("\n")}\n} as const;\n\n` +
     `export type EntityIdFields = typeof entityIdFields;\n\n` +
-    `export const entityQueries: Record<string, string[]> = {\n${entityQueriesLines.join("\n")}\n};\n`;
+    `export const entityQueries: Record<string, string[]> = {\n${entityQueriesLines.join("\n")}\n};\n\n` +
+    `export function updateEntity(\n` +
+    `  entityType: string,\n` +
+    `  id: string | number,\n` +
+    `  updater: (entity: Draft<any>) => void,\n` +
+    `) {\n` +
+    `  return updateEntityInternal(entityType, id, updater, "api", entityIdFields, queryMap, entityQueries);\n` +
+    `}\n\n` +
+    `export function deleteEntity(entityType: string, id: string | number) {\n` +
+    `  return deleteEntityInternal(entityType, id, "api", entityIdFields, queryMap, entityQueries);\n` +
+    `}\n\n` +
+    `export function setupMutationListeners(\n` +
+    `  listenerMiddleware: ReturnType<typeof createListenerMiddleware>,\n` +
+    `  api: Api<any, any, any, any, any>,\n` +
+    `) {\n` +
+    `  setupMutationListenersInternal(listenerMiddleware, api, entityIdFields, mutationsMap, api.reducerPath, queryMap, entityQueries,);\n` +
+    `}\n`;
 
   fs.writeFileSync(
     outputFilePath,

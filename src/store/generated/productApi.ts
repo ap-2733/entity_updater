@@ -1,3 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Draft } from "immer";
+import { createListenerMiddleware } from "@reduxjs/toolkit";
+import { Api } from "@reduxjs/toolkit/query";
+import {
+  updateEntityInternal,
+  deleteEntityInternal,
+  setupMutationListenersInternal,
+} from "@/src/scripts/content/utils";
+
 export const queryMap = {
   getUsers: "User[]",
   getUsersSearch: "User[]",
@@ -90,7 +100,7 @@ export const queryMap = {
 
 export type QueryMap = typeof queryMap;
 
-export const mutationsMap: Record<string, string> = {
+export const mutationsMap = {
   patchUsersById: "User",
   patchRepositoriesById: "Repository",
   putIssuesById: "Issue",
@@ -99,7 +109,9 @@ export const mutationsMap: Record<string, string> = {
   patchPullRequestsById: "PullRequest",
 } as const;
 
-export const entityIdFields: Record<string, string> = {
+export type MutationsMap = typeof mutationsMap;
+
+export const entityIdFields = {
   User: "_id",
   Repository: "_id",
   Team: "_id",
@@ -250,3 +262,45 @@ export const entityQueries: Record<string, string[]> = {
   ],
   ReviewThread: ["getPullRequestsByIdReviews"],
 };
+
+export function updateEntity(
+  entityType: string,
+  id: string | number,
+  updater: (entity: Draft<any>) => void,
+) {
+  return updateEntityInternal(
+    entityType,
+    id,
+    updater,
+    "api",
+    entityIdFields,
+    queryMap,
+    entityQueries,
+  );
+}
+
+export function deleteEntity(entityType: string, id: string | number) {
+  return deleteEntityInternal(
+    entityType,
+    id,
+    "api",
+    entityIdFields,
+    queryMap,
+    entityQueries,
+  );
+}
+
+export function setupMutationListeners(
+  listenerMiddleware: ReturnType<typeof createListenerMiddleware>,
+  api: Api<any, any, any, any, any>,
+) {
+  setupMutationListenersInternal(
+    listenerMiddleware,
+    api,
+    entityIdFields,
+    mutationsMap,
+    api.reducerPath,
+    queryMap,
+    entityQueries,
+  );
+}

@@ -3,7 +3,6 @@
 import { Draft, produce } from "immer";
 import { createListenerMiddleware } from "@reduxjs/toolkit";
 import { Api } from "@reduxjs/toolkit/query";
-import { updateEntity } from "@/src/scripts/content/index";
 
 export function get(root: unknown, path: (string | number)[]): unknown {
   let node: any = root;
@@ -326,6 +325,9 @@ export function setupMutationListenersInternal(
   api: Api<any, any, any, any, any>,
   entityIdFields: Record<string, string>,
   mutationsMap: Record<string, string>,
+  reducerPath: string,
+  queryMap: any,
+  entityQueries: Record<string, string[]>,
 ) {
   for (const [mutationName, entityType] of Object.entries(mutationsMap)) {
     const endpoint = api.endpoints[mutationName];
@@ -334,13 +336,20 @@ export function setupMutationListenersInternal(
       effect: async (action, listenerApi) => {
         const dispatch = listenerApi.dispatch as any;
         const data = (action as any).payload;
-        const idField =
-          entityIdFields[entityType as keyof typeof entityIdFields];
+        const idField = entityIdFields[entityType];
         const id = data[idField];
         await dispatch(
-          updateEntity(entityType as any, id, (entity) => {
-            Object.assign(entity, data);
-          }),
+          updateEntityInternal(
+            entityType,
+            id,
+            (entity: any) => {
+              Object.assign(entity, data);
+            },
+            reducerPath,
+            entityIdFields,
+            queryMap,
+            entityQueries,
+          ),
         );
       },
     });

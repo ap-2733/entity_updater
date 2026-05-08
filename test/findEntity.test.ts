@@ -21,7 +21,7 @@ import {
   entityIdFields,
   entityQueries,
   queryMap,
-} from "@/src/scripts/content/apiMap";
+} from "@/src/store/generated/productApi";
 
 beforeEach(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +69,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
+        findEntityGenerator(
+          "User",
+          user1._id,
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).toHaveBeenCalledTimes(1);
@@ -376,7 +385,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntityGenerator("Issue", issue1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
+        findEntityGenerator(
+          "Issue",
+          issue1._id,
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -517,7 +535,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
+        findEntityGenerator(
+          "User",
+          user1._id,
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -528,7 +555,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
+        findEntityGenerator(
+          "User",
+          user1._id,
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -541,7 +577,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntityGenerator("User", user1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
+        findEntityGenerator(
+          "User",
+          user1._id,
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -558,7 +603,16 @@ describe("findEntity", () => {
       const callback = jest.fn();
 
       await promisifyGenerator(
-        findEntityGenerator("Issue", issue1._id, queries, callback, Infinity, entityIdFields, queryMap, entityQueries),
+        findEntityGenerator(
+          "Issue",
+          issue1._id,
+          queries,
+          callback,
+          Infinity,
+          entityIdFields,
+          queryMap,
+          entityQueries,
+        ),
       );
 
       expect(callback).not.toHaveBeenCalled();
@@ -601,7 +655,16 @@ describe("findEntity", () => {
 
       await expect(
         promisifyGenerator(
-          findEntityGenerator("User", user1._id, queries, jest.fn(), 1, entityIdFields, queryMap, entityQueries),
+          findEntityGenerator(
+            "User",
+            user1._id,
+            queries,
+            jest.fn(),
+            1,
+            entityIdFields,
+            queryMap,
+            entityQueries,
+          ),
         ),
       ).resolves.toBeUndefined();
 

@@ -3,8 +3,8 @@ import { productApi } from "@/src/store/productApi";
 // import { mutationListenerMiddleware } from "./generated/mutationListeners";
 
 import { useDispatch, useSelector } from "react-redux";
-import { setupMutationListeners } from "@/src/scripts/content";
 import { wrapApiReducer } from "@/src/scripts/content/utils";
+import { setupMutationListeners } from "@/src/store/generated/productApi";
 
 const listenerMiddleware = createListenerMiddleware();
 
